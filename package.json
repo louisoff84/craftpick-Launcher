@@ -1,7 +1,7 @@
 {
     "name": "craftpick",
     "preductname": "craftpick Launcher",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Launcher Mincraft pour le serveur craftpick.fr",
     "main": "src/app.js",
     "author": {
