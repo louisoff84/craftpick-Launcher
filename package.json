@@ -1,7 +1,7 @@
 {
     "name": "craftpick",
     "preductname": "craftpick Launcher",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Launcher Mincraft pour le serveur craftpick.fr",
     "main": "src/app.js",
     "author": {
@@ -14,7 +14,7 @@
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
         "build": "node build.js --obf=true --build=platform",
-        "icon": "node build.js --icon=https://craftpick.fr/storage/img/img-launcher.png"
+        "icon": "node build.js --icon=https://craftpick.fr/storage/img/craftpick-png.png"
     },
     "license": "CCANC",
     "nodemonConfig": {
