@@ -1,7 +1,7 @@
 {
     "name": "craftpick",
     "preductname": "craftpick Launcher",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Launcher Mincraft pour le serveur craftpick.fr",
     "main": "src/app.js",
     "author": {
@@ -9,7 +9,7 @@
         "email": "contact@luuxis.fr",
         "url": "https://github.com/luuxis"
     },
-    "url": "https://cdn.craftpick.fr/storage",
+    "url": "https://cdn.craftpick.fr/launcher",
     "scripts": {
         "start": "cross-env-shell NODE_ENV=dev electron .",
         "dev": "cross-env-shell DEV_TOOL=open nodemon --exec npm start",
