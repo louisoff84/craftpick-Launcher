@@ -2,7 +2,7 @@
  * @author Luuxis
  * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
-import { config, database, logger, changePanel, appdata, setStatus, pkg, popup } from '../utils.js'
+import { config, database, logger, changePanel, appdata, setStatus, pkg, popup, getMergedInstanceList } from '../utils.js'
 
 const { Launch } = require('minecraft-java-core')
 const { shell, ipcRenderer } = require('electron')
@@ -103,7 +103,7 @@ class Home {
     async instancesSelect() {
         let configClient = await this.db.readData('configClient')
         let auth = await this.db.readData('accounts', configClient.account_selected)
-        let instancesList = await config.getInstanceList()
+        let instancesList = await getMergedInstanceList(this.db)
         let instanceSelect = instancesList.find(i => i.name == configClient?.instance_selct) ? configClient?.instance_selct : null
 
         let instanceBTN = document.querySelector('.play-instance')
@@ -155,7 +155,7 @@ class Home {
                 await this.db.updateData('configClient', configClient)
                 instanceSelect = instancesList.filter(i => i.name == newInstanceSelect)
                 instancePopup.style.display = 'none'
-                let instance = await config.getInstanceList()
+                let instance = await getMergedInstanceList(this.db)
                 let options = instance.find(i => i.name == configClient.instance_selct)
                 await setStatus(options.status)
             }
@@ -198,53 +198,74 @@ class Home {
     }
 
     async startGame() {
-        let launch = new Launch()
         let configClient = await this.db.readData('configClient')
-        let instance = await config.getInstanceList()
-        let authenticator = await this.db.readData('accounts', configClient.account_selected)
+        let instance = await getMergedInstanceList(this.db)
         let options = instance.find(i => i.name == configClient.instance_selct)
 
+        if (!options) {
+            new popup().openPopup({
+                title: 'Erreur',
+                content: 'Aucune instance sélectionnée ou instance introuvable. Vérifiez vos paramètres.',
+                color: 'red',
+                options: true
+            });
+            return;
+        }
+
+        let authenticator = await this.db.readData('accounts', configClient.account_selected)
+        if (!authenticator) {
+            new popup().openPopup({
+                title: 'Erreur',
+                content: 'Aucun compte sélectionné. Connectez-vous d\'abord.',
+                color: 'red',
+                options: true
+            });
+            return;
+        }
+
+        let launch = new Launch()
         let playInstanceBTN = document.querySelector('.play-instance')
         let infoStartingBOX = document.querySelector('.info-starting-game')
         let infoStarting = document.querySelector(".info-starting-game-text")
         let progressBar = document.querySelector('.progress-bar')
 
         let opt = {
-            url: options.url,
+            url: options.url || null,
             authenticator: authenticator,
             timeout: 10000,
             path: `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}`,
             instance: options.name,
-            version: options.loadder.minecraft_version,
-            detached: configClient.launcher_config.closeLauncher == "close-all" ? false : true,
-            downloadFileMultiple: configClient.launcher_config.download_multi,
-            intelEnabledMac: configClient.launcher_config.intelEnabledMac,
+            version: options.loadder?.minecraft_version || 'latest_release',
+            detached: configClient?.launcher_config?.closeLauncher == "close-all" ? false : true,
+            downloadFileMultiple: configClient?.launcher_config?.download_multi ?? 5,
+            intelEnabledMac: configClient?.launcher_config?.intelEnabledMac ?? true,
 
             loader: {
-                type: options.loadder.loadder_type,
-                build: options.loadder.loadder_version,
-                enable: options.loadder.loadder_type == 'none' ? false : true
+                type: options.loadder?.loadder_type === 'none' ? null : (options.loadder?.loadder_type || null),
+                build: options.loadder?.loadder_version || 'latest',
+                enable: options.loadder?.loadder_type && options.loadder.loadder_type !== 'none'
             },
 
-            verify: options.verify,
+            verify: options.verify ?? false,
 
-            ignored: [...options.ignored],
+            ignored: Array.isArray(options.ignored) ? [...options.ignored] : [],
 
             java: {
-                path: configClient.java_config.java_path,
+                path: configClient.java_config?.java_path || null,
+                type: 'jre',
             },
 
-            JVM_ARGS:  options.jvm_args ? options.jvm_args : [],
-            GAME_ARGS: options.game_args ? options.game_args : [],
+            JVM_ARGS:  Array.isArray(options.jvm_args) ? options.jvm_args : [],
+            GAME_ARGS: Array.isArray(options.game_args) ? options.game_args : [],
 
             screen: {
-                width: configClient.game_config.screen_size.width,
-                height: configClient.game_config.screen_size.height
+                width: configClient?.game_config?.screen_size?.width ?? 854,
+                height: configClient?.game_config?.screen_size?.height ?? 480
             },
 
             memory: {
-                min: `${configClient.java_config.java_memory.min * 1024}M`,
-                max: `${configClient.java_config.java_memory.max * 1024}M`
+                min: `${(configClient?.java_config?.java_memory?.min ?? 2) * 1024}M`,
+                max: `${(configClient?.java_config?.java_memory?.max ?? 4) * 1024}M`
             }
         }
 

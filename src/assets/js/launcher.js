@@ -110,8 +110,11 @@ class Launcher {
                     download_multi: 5,
                     theme: 'auto',
                     closeLauncher: 'close-launcher',
-                    intelEnabledMac: true
-                }
+                    intelEnabledMac: true,
+                    background: 'random',
+                    background_custom_path: null
+                },
+                custom_instances: []
             })
         }
     }

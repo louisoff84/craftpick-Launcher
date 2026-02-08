@@ -3,6 +3,7 @@
         <p>Paramètres</p>
         <div class="nav-box">
             <div id="account" class="nav-settings-btn active-settings-BTN">COMPTES</div>
+            <div id="instances" class="nav-settings-btn">INSTANCES</div>
             <div id="java" class="nav-settings-btn">JAVA</div>
             <div id="resolution" class="nav-settings-btn">RESOLUTION</div>
             <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
@@ -19,6 +20,51 @@
                     <div class="icon-account-add"></div>
                 </div>
                 <div class="add-text-profile">Ajouter un compte / add an account</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="instances-tab" class="container-settings content-scroll">
+        <div class="titre-tab">Mes instances</div>
+        <div class="setting-text" style="margin-bottom: 1rem;">
+            Créez vos propres instances Minecraft (vanilla, Forge, Fabric...). Les instances du serveur CraftPick restent disponibles.
+        </div>
+        <div class="instances-list content-scroll" id="custom-instances-list"></div>
+        <button class="add-instance-btn">+ Créer une instance</button>
+
+        <div class="instance-form-popup" id="instance-form-popup">
+            <div class="instance-form-tab">
+                <div class="close-popup icon-close" id="close-instance-form"></div>
+                <h3 class="instance-form-title">Nouvelle instance</h3>
+                <div class="instance-form">
+                    <label>Nom de l'instance</label>
+                    <input type="text" class="instance-input instance-name" placeholder="Ma instance">
+                    <label>Version Minecraft</label>
+                    <input type="text" class="instance-input instance-version" placeholder="1.20.4 ou latest_release">
+                    <label>Mod loader</label>
+                    <select class="instance-input instance-loader-type">
+                        <option value="none">Aucun (Vanilla)</option>
+                        <option value="forge">Forge</option>
+                        <option value="fabric">Fabric</option>
+                        <option value="neoforge">Neoforge</option>
+                        <option value="quilt">Quilt</option>
+                        <option value="legacyfabric">Legacy Fabric</option>
+                    </select>
+                    <label>Version du loader (ex: latest, 0.15.9)</label>
+                    <input type="text" class="instance-input instance-loader-version" placeholder="latest" disabled>
+                    <label>URL personnalisée (optionnel)</label>
+                    <input type="text" class="instance-input instance-url" placeholder="https://...">
+                    <label>Serveur - IP (optionnel)</label>
+                    <input type="text" class="instance-input instance-server-ip" placeholder="play.example.com">
+                    <label>Serveur - Port</label>
+                    <input type="number" class="instance-input instance-server-port" placeholder="25565">
+                    <label>Nom du serveur (affiché)</label>
+                    <input type="text" class="instance-input instance-server-name" placeholder="Mon serveur">
+                </div>
+                <div class="instance-form-actions">
+                    <button class="instance-form-cancel">Annuler</button>
+                    <button class="instance-form-save">Créer</button>
+                </div>
             </div>
         </div>
     </div>
@@ -126,6 +172,23 @@ It is recommended not to exceed 4GB for this value.
                 <div class="theme-btn theme-btn-clair">Clair</div>
                 <div class="theme-btn theme-btn-sombre">Sombre</div>
                 <div class="theme-btn theme-btn-auto">Automatique</div>
+            </div>
+        </div>
+
+        <div class="titre-tab">Arrière-plan du launcher</div>
+        <div class="settings-elements-box">
+            <div class="setting-text">
+                Choisissez l'arrière-plan affiché par le launcher. Les fonds s'adaptent au thème (clair/sombre).<br>
+                Vous pouvez sélectionner un fond intégré, une image personnalisée, ou désactiver l'arrière-plan.
+            </div>
+            <div class="settings-elements content-center background-box">
+                <div class="background-option background-random" data-background="random">Aléatoire</div>
+                <div class="background-option background-none" data-background="none">Aucun</div>
+                <div class="background-previews" id="background-previews"></div>
+                <div class="background-custom background-option" data-background="custom">
+                    <input type="file" class="background-file-input" accept="image/png,image/jpeg,image/jpg,image/webp" hidden>
+                    <div class="background-custom-btn">Image personnalisée</div>
+                </div>
             </div>
         </div>
 

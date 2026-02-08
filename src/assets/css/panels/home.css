@@ -2,7 +2,51 @@
     display: flex;
     height: 100%;
     flex-direction: column;
+    background: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Header avec status + bouton paramètres                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.home-header {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    background: var(--background-transparent);
+    border-radius: 0 0 12px 12px;
+    flex-shrink: 0;
+}
+
+.settings-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0;
+    border: none;
+    background: var(--background-element);
+    color: var(--element-color);
+    border-radius: 12px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.settings-btn:hover {
+    background: var(--element-color);
+    color: var(--background);
+    transform: scale(1.05);
+}
+
+.settings-btn:active {
+    transform: scale(0.98);
 }
 
 /*******************************************************************************
@@ -16,12 +60,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--background);
+    background: var(--background-element);
     width: 25rem;
     height: 3rem;
     color: var(--color);
-    border-radius: 10px;
-    margin-top: 3rem;
+    border-radius: 12px;
     padding: 1rem;
     text-align: center;
 }
@@ -72,16 +115,171 @@
     background: #FF0409;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * Contenu principal (sidebar + main)                                          *
+ *                                                                             *
+ ******************************************************************************/
+
+.home-content {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 1.5rem;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Sidebar gauche (profil + bouton jouer)                                      *
+ *                                                                             *
+ ******************************************************************************/
+
+.home-sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--background-transparent);
+    border-radius: 12px;
+    margin: 1rem 0 1rem 1rem;
+    width: 220px;
+    flex-shrink: 0;
+}
+
+.player-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.player-head {
+    background: url('../../images/default/setve.png') no-repeat;
+    background-size: cover;
+    image-rendering: pixelated;
+    transition: var(--transition);
+    height: 4rem;
+    width: 4rem;
+    pointer-events: none;
+    border-radius: 12px;
+    border: 3px solid var(--element-color);
+}
+
+.player-label {
+    font-size: 0.75rem;
+    color: var(--element-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.player-menu {
+    color: var(--element-color);
+    transform: rotate(270deg);
+    pointer-events: none;
+}
+
+.play-elements {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.play-instance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    border: solid 3px var(--element-color);
+    border-radius: 14px;
+    height: 3.5rem;
+    padding-right: 2rem;
+    width: 100%;
+    background: var(--background-element);
+}
+
+.play-btn {
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: var(--color);
+    font-size: 1.5rem;
+    font-weight: bolder;
+    padding: 0 1rem;
+    pointer-events: none;
+}
+
+.instance-select {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: -3px;
+    top: -2px;
+    color: var(--element-color);
+    font-size: 1rem;
+    height: calc(100% - 1px);
+    border: solid 3px var(--element-color);
+    text-align: center;
+    border-radius: 12px;
+    padding: 0 0.5rem;
+    cursor: pointer;
+    background: var(--background);
+}
+
+.instance-select:before {
+    transform: rotate(270deg);
+    pointer-events: none;
+}
+
+.info-starting-game {
+    display: none;
+    text-align: center;
+    width: 100%;
+}
+
+.progress-bar {
+    appearance: none;
+    height: 10px;
+    margin: 0.5rem 0;
+    width: 100%;
+}
+
+.progress-bar::-webkit-progress-bar {
+    background-color: var(--background);
+    border: solid 1px var(--element-color);
+    border-radius: 10px;
+}
+
+.progress-bar::-webkit-progress-value {
+    background-color: var(--element-color);
+    border-radius: 10px;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Zone principale (actualités + réseaux sociaux)                              *
+ *                                                                             *
+ ******************************************************************************/
+
+.home-main {
+    display: flex;
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
 .home-bottom {
     position: relative;
     width: 100%;
-    height: calc(100% - 80px - 8rem);
+    height: 100%;
     display: flex;
 }
 
 /*******************************************************************************
  *                                                                             *
- * news server                                                                 *
+ * Actualités                                                                  *
  *                                                                             *
  ******************************************************************************/
 
@@ -112,7 +310,7 @@
 .news-block {
     width: 100%;
     margin: 0 0 1rem 0;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--background-transparent);
 }
 
@@ -140,13 +338,11 @@
     padding: 0 1.5rem;
     padding-bottom: 1rem;
     font-size: 1.2rem;
-
 }
 
 .news-content .bbWrapper p {
     font-weight: 100;
     margin: 0;
-
 }
 
 .news-content .bbWrapper .news-author {
@@ -161,7 +357,7 @@
 
 /*******************************************************************************
  *                                                                             *
- * social server                                                               *
+ * Réseaux sociaux                                                             *
  *                                                                             *
  ******************************************************************************/
 
@@ -187,11 +383,16 @@
     width: 90px;
     height: 90px;
     margin-bottom: 1rem;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 2rem;
     cursor: pointer;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s;
+}
+
+.social-block:hover {
+    transform: scale(1.05);
 }
 
 .social-block .icon-social {
@@ -204,123 +405,9 @@
 
 /*******************************************************************************
  *                                                                             *
- * sidebar                                                                     *
+ * Popup instances                                                             *
  *                                                                             *
  ******************************************************************************/
-
-.sidebar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    height: 90px;
-    background: var(--background-transparent);
-}
-
-.player-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-radius: 15px;
-    height: 3rem;
-    margin: 0 1.5rem;
-}
-
-.player-head {
-    background: url('../../images/default/setve.png'), no-repeat;
-    background-size: cover;
-    image-rendering: pixelated;
-    transition: var(--transition);
-    height: 3rem;
-    width: 3rem;
-    pointer-events: none;
-    border-radius: 15px;
-}
-
-.player-menu {
-    color: var(--element-color);
-    transform: rotate(270deg);
-    pointer-events: none;
-}
-
-.play-elements {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.play-instance {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-    border: solid 3px var(--element-color);
-    border-radius: 15px;
-    height: 3.2rem;
-    padding-right: 1.9rem;
-}
-
-.play-btn {
-    border: none;
-    border-radius: 10px;
-    background: none;
-    color: var(--color);
-    font-size: 2rem;
-    font-weight: bolder;
-    padding: 0 1.5rem;
-    pointer-events: none;
-}
-
-.instance-select {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    right: -3;
-    top: -2;
-    color: var(--element-color);
-    font-size: 1rem;
-    height: calc(100% - 1px);
-    border: solid 3px var(--element-color);
-    text-align: center;
-    border-radius: 15px;
-    padding: 0 0.5rem;
-    cursor: pointer;
-}
-
-.instance-select:before {
-    transform: rotate(270deg);
-    pointer-events: none;
-}
-
-.info-starting-game {
-    display: none;
-    text-align: center;
-}
-
-.progress-bar {
-    appearance: none;
-    height: 10px;
-    margin: 0.5rem 0;
-}
-
-.progress-bar::-webkit-progress-bar {
-    background-color: var(--background);
-    border: solid 1px var(--element-color);
-    border-radius: 10px;
-}
-
-.progress-bar::-webkit-progress-value {
-    background-color: var(--element-color);
-    border-radius: 10px;
-}
-
-.settings-btn {
-    width: 3rem;
-    height: 3rem;
-    font-size: 3rem;
-    color: var(--element-color);
-    margin: 0 1.5rem;
-}
 
 .instance-popup {
     position: absolute;
@@ -338,7 +425,7 @@
 .instances-tab {
     position: relative;
     background: var(--background);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 1rem 3rem;
 }
 
@@ -353,6 +440,7 @@
     border-radius: 10px;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
 .instances-tab p {

@@ -411,3 +411,239 @@
 .active-close {
     border: 4px solid var(--element-color);
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * Arrière-plan                                                                *
+ *                                                                             *
+ ******************************************************************************/
+
+.background-box {
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.background-option {
+    padding: 0.5rem 1rem;
+    border: 3px solid var(--element-color);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.background-option:hover {
+    background: var(--background-transparent);
+}
+
+.background-option.active-background {
+    background: var(--element-color);
+    color: var(--background);
+}
+
+.background-previews {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.background-preview {
+    width: 80px;
+    height: 45px;
+    border-radius: 8px;
+    border: 3px solid var(--element-color);
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.2s;
+}
+
+.background-preview:hover {
+    transform: scale(1.05);
+}
+
+.background-preview.active-background {
+    border-color: var(--color);
+    box-shadow: 0 0 0 2px var(--element-color);
+}
+
+.background-custom {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.background-custom-btn {
+    padding: 0.5rem 1rem;
+    border: 3px dashed var(--element-color);
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.background-custom-btn:hover {
+    background: var(--background-transparent);
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * Instances personnalisées                                                    *
+ *                                                                             *
+ ******************************************************************************/
+
+.add-instance-btn {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    background: var(--element-color);
+    color: var(--background);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-instance-btn:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.instances-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-height: 300px;
+}
+
+.instance-card {
+    background: var(--background-element);
+    border: 3px solid var(--background-element);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.instance-card.custom-instance {
+    border-color: var(--element-color);
+}
+
+.instance-card-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.instance-card-info {
+    font-size: 0.85rem;
+    color: var(--color);
+    opacity: 0.9;
+}
+
+.instance-card-delete {
+    margin-top: auto;
+    padding: 0.3rem;
+    background: #ff2c2c33;
+    color: #ff2c2c;
+    border: 2px solid #ff2c2c;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.instance-card-delete:hover {
+    background: #ff2c2c;
+    color: white;
+}
+
+.instance-form-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000b3;
+    z-index: 20;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.instance-form-popup.show {
+    display: flex;
+}
+
+.instance-form-tab {
+    position: relative;
+    background: var(--background);
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 450px;
+    width: 90%;
+}
+
+.instance-form-tab .close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.instance-form-title {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+.instance-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.instance-form label {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.instance-input {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--element-color);
+    border-radius: 10px;
+    background: var(--shadow);
+    color: var(--color);
+}
+
+.instance-input:disabled {
+    opacity: 0.6;
+}
+
+.instance-form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.instance-form-cancel,
+.instance-form-save {
+    padding: 0.5rem 1.5rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.instance-form-cancel {
+    background: transparent;
+    border: 2px solid var(--color);
+    color: var(--color);
+}
+
+.instance-form-save {
+    background: var(--element-color);
+    border: none;
+    color: var(--background);
+}

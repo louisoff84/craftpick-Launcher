@@ -3,7 +3,7 @@
  * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
-import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground } from '../utils.js'
+import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground, getAvailableBackgrounds, getMergedInstanceList, createCustomInstance } from '../utils.js'
 const { ipcRenderer } = require('electron');
 const os = require('os');
 
@@ -18,6 +18,8 @@ class Settings {
         this.javaPath()
         this.resolution()
         this.launcher()
+        this.backgrounds()
+        this.instances()
     }
 
     navBTN() {
@@ -105,7 +107,7 @@ class Settings {
     async setInstance(auth) {
         let configClient = await this.db.readData('configClient')
         let instanceSelect = configClient.instance_selct
-        let instancesList = await config.getInstanceList()
+        let instancesList = await getMergedInstanceList(this.db)
 
         for (let instance of instancesList) {
             if (instance.whitelistActive) {
@@ -322,6 +324,172 @@ class Settings {
                 }
             }
         })
+    }
+
+    async backgrounds() {
+        const { ipcRenderer } = require('electron');
+        let configClient = await this.db.readData('configClient') || {};
+        if (!configClient.launcher_config) configClient.launcher_config = {};
+        if (configClient.launcher_config.background == null) configClient.launcher_config.background = 'random';
+        if (configClient.launcher_config.background_custom_path == null) configClient.launcher_config.background_custom_path = null;
+
+        const theme = configClient?.launcher_config?.theme || 'auto';
+        const isDark = theme === 'dark' || (theme === 'auto' && await ipcRenderer.invoke('is-dark-theme', theme));
+        const availableBg = getAvailableBackgrounds(isDark);
+
+        const container = document.getElementById('background-previews');
+        container.innerHTML = '';
+        availableBg.forEach(file => {
+            const div = document.createElement('div');
+            div.className = 'background-preview' + (configClient.launcher_config.background === file ? ' active-background' : '');
+            div.dataset.background = file;
+            div.style.backgroundImage = `url(./assets/images/background/${isDark ? 'dark' : 'light'}/${file})`;
+            div.title = file;
+            container.appendChild(div);
+        });
+
+        document.querySelectorAll('.background-option[data-background]').forEach(el => {
+            if (el.dataset.background === configClient.launcher_config.background) el.classList.add('active-background');
+        });
+
+        const updateActive = (value) => {
+            document.querySelectorAll('.background-option, .background-preview').forEach(el => el.classList.remove('active-background'));
+            document.querySelector(`.background-option[data-background="${value}"]`)?.classList.add('active-background');
+            document.querySelector(`.background-preview[data-background="${value}"]`)?.classList.add('active-background');
+        };
+
+        document.querySelector('.background-box').addEventListener('click', async e => {
+            const opt = e.target.closest('.background-option[data-background]');
+            const preview = e.target.closest('.background-preview');
+            if (opt && opt.dataset.background !== 'custom') {
+                configClient = await this.db.readData('configClient');
+                configClient.launcher_config.background = opt.dataset.background;
+                configClient.launcher_config.background_custom_path = null;
+                await this.db.updateData('configClient', configClient);
+                updateActive(opt.dataset.background);
+                await setBackground();
+            } else if (preview) {
+                configClient = await this.db.readData('configClient');
+                configClient.launcher_config.background = preview.dataset.background;
+                configClient.launcher_config.background_custom_path = null;
+                await this.db.updateData('configClient', configClient);
+                updateActive(preview.dataset.background);
+                await setBackground();
+            }
+        });
+
+        const fileInput = document.querySelector('.background-file-input');
+        const customBtn = document.querySelector('.background-custom-btn');
+        customBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            try {
+                const destPath = await ipcRenderer.invoke('save-custom-background', file.path);
+                configClient = await this.db.readData('configClient');
+                configClient.launcher_config.background = 'custom';
+                configClient.launcher_config.background_custom_path = destPath;
+                await this.db.updateData('configClient', configClient);
+                updateActive('custom');
+                await setBackground();
+            } catch (err) {
+                console.error(err);
+                alert('Impossible de charger l\'image personnalisée.');
+            }
+            fileInput.value = '';
+        });
+    }
+
+    async instances() {
+        const listEl = document.getElementById('custom-instances-list');
+        const addBtn = document.querySelector('.add-instance-btn');
+        const popup = document.getElementById('instance-form-popup');
+        const closeBtn = document.getElementById('close-instance-form');
+        const cancelBtn = document.querySelector('.instance-form-cancel');
+        const saveBtn = document.querySelector('.instance-form-save');
+        const loaderTypeSelect = document.querySelector('.instance-loader-type');
+
+        const renderInstances = async () => {
+            let configClient = await this.db.readData('configClient') || {};
+            const custom = configClient.custom_instances || [];
+            listEl.innerHTML = '';
+            custom.forEach(inst => {
+                const card = document.createElement('div');
+                card.className = 'instance-card custom-instance';
+                card.innerHTML = `
+                    <div class="instance-card-name">${inst.name}</div>
+                    <div class="instance-card-info">Minecraft ${inst.loadder?.minecraft_version || '?'} - ${inst.loadder?.loadder_type === 'none' ? 'Vanilla' : inst.loadder?.loadder_type}</div>
+                    <button class="instance-card-delete" data-name="${inst.name}">Supprimer</button>
+                `;
+                listEl.appendChild(card);
+            });
+        };
+
+        loaderTypeSelect.addEventListener('change', () => {
+            document.querySelector('.instance-loader-version').disabled = loaderTypeSelect.value === 'none';
+        });
+
+        addBtn.addEventListener('click', () => {
+            document.querySelector('.instance-name').value = '';
+            document.querySelector('.instance-version').value = '1.20.4';
+            document.querySelector('.instance-loader-type').value = 'none';
+            document.querySelector('.instance-loader-version').value = 'latest';
+            document.querySelector('.instance-loader-version').disabled = true;
+            document.querySelector('.instance-url').value = '';
+            document.querySelector('.instance-server-ip').value = '';
+            document.querySelector('.instance-server-port').value = '25565';
+            document.querySelector('.instance-server-name').value = '';
+            popup.classList.add('show');
+        });
+
+        const closeForm = () => popup.classList.remove('show');
+        closeBtn.addEventListener('click', closeForm);
+        cancelBtn.addEventListener('click', closeForm);
+
+        saveBtn.addEventListener('click', async () => {
+            const name = document.querySelector('.instance-name').value.trim();
+            if (!name) {
+                alert('Veuillez entrer un nom pour l\'instance.');
+                return;
+            }
+            let configClient = await this.db.readData('configClient') || {};
+            configClient.custom_instances = configClient.custom_instances || [];
+            if (configClient.custom_instances.some(i => i.name === name)) {
+                alert('Une instance avec ce nom existe déjà.');
+                return;
+            }
+            const newInstance = createCustomInstance({
+                name,
+                minecraft_version: document.querySelector('.instance-version').value || '1.20.4',
+                loader_type: document.querySelector('.instance-loader-type').value,
+                loader_version: document.querySelector('.instance-loader-version').value || 'latest',
+                url: document.querySelector('.instance-url').value || null,
+                server_ip: document.querySelector('.instance-server-ip').value || 'localhost',
+                server_port: parseInt(document.querySelector('.instance-server-port').value) || 25565,
+                server_name: document.querySelector('.instance-server-name').value || name
+            });
+            configClient.custom_instances.push(newInstance);
+            await this.db.updateData('configClient', configClient);
+            await renderInstances();
+            closeForm();
+        });
+
+        listEl.addEventListener('click', async e => {
+            if (e.target.classList.contains('instance-card-delete')) {
+                const name = e.target.dataset.name;
+                if (!confirm(`Supprimer l'instance "${name}" ?`)) return;
+                let configClient = await this.db.readData('configClient') || {};
+                configClient.custom_instances = (configClient.custom_instances || []).filter(i => i.name !== name);
+                if (configClient.instance_selct === name) {
+                    const all = await getMergedInstanceList(this.db);
+                    configClient.instance_selct = all.find(i => i.name !== name)?.name || null;
+                }
+                await this.db.updateData('configClient', configClient);
+                await renderInstances();
+            }
+        });
+
+        await renderInstances();
     }
 }
 export default Settings;

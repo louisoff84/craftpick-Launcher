@@ -5,7 +5,7 @@
 const { AZauth, Mojang } = require('minecraft-java-core');
 const { ipcRenderer } = require('electron');
 
-import { popup, database, changePanel, accountSelect, addAccount, config, setStatus } from '../utils.js';
+import { popup, database, changePanel, accountSelect, addAccount, config, setStatus, getMergedInstanceList } from '../utils.js';
 
 class Login {
     static id = "login";
@@ -195,7 +195,7 @@ class Login {
         let configClient = await this.db.readData('configClient');
         let account = await this.db.createData('accounts', connectionData)
         let instanceSelect = configClient.instance_selct
-        let instancesList = await config.getInstanceList()
+        let instancesList = await getMergedInstanceList(this.db)
         configClient.account_selected = account.ID;
 
         for (let instance of instancesList) {

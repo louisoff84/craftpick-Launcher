@@ -6,6 +6,7 @@
 const { ipcRenderer } = require('electron')
 const { Status } = require('minecraft-java-core')
 const fs = require('fs');
+const path = require('path');
 const pkg = require('../package.json');
 
 import config from './utils/config.js';
@@ -16,26 +17,109 @@ import { skin2D } from './utils/skin.js';
 import slider from './utils/slider.js';
 
 async function setBackground(theme) {
+    let databaseLauncher = new database();
+    let configClient = await databaseLauncher.readData('configClient');
+    let backgroundConfig = configClient?.launcher_config?.background || 'random';
+    let customPath = configClient?.launcher_config?.background_custom_path;
+
     if (typeof theme == 'undefined') {
-        let databaseLauncher = new database();
-        let configClient = await databaseLauncher.readData('configClient');
-        theme = configClient?.launcher_config?.theme || "auto"
-        theme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
+        theme = configClient?.launcher_config?.theme || "auto";
+        theme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res);
     }
-    let background
+
+    const isDark = theme;
+    const themeFolder = isDark ? 'dark' : 'light';
+    const basePath = `${__dirname}/assets/images/background`;
+    let background = null;
+
     let body = document.body;
-    body.className = theme ? 'dark global' : 'light global';
-    if (fs.existsSync(`${__dirname}/assets/images/background/easterEgg`) && Math.random() < 0.005) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/easterEgg`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `url(./assets/images/background/easterEgg/${Background})`;
-    } else if (fs.existsSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`)) {
-        let backgrounds = fs.readdirSync(`${__dirname}/assets/images/background/${theme ? 'dark' : 'light'}`);
-        let Background = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-        background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${theme ? 'dark' : 'light'}/${Background})`;
+    body.className = isDark ? 'dark global' : 'light global';
+
+    // Mode "aucun" : fond uni
+    if (backgroundConfig === 'none') {
+        body.style.backgroundImage = 'none';
+        body.style.backgroundColor = isDark ? '#292929' : 'rgb(245, 245, 245)';
+        body.style.backgroundSize = 'cover';
+        return;
     }
-    body.style.backgroundImage = background ? background : theme ? '#000' : '#fff';
+
+    // Image personnalisée
+    if (backgroundConfig === 'custom' && customPath && fs.existsSync(customPath)) {
+        const fileUrl = 'file:///' + path.normalize(customPath).replace(/\\/g, '/').replace(/^\/+/, '');
+        background = `linear-gradient(#00000080, #00000080), url(${fileUrl})`;
+    }
+    // Fond intégré spécifique (1.png, 2.png, etc.)
+    else if (backgroundConfig && backgroundConfig !== 'random') {
+        const filePath = `${basePath}/${themeFolder}/${backgroundConfig}`;
+        if (fs.existsSync(filePath)) {
+            background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${themeFolder}/${backgroundConfig})`;
+        }
+    }
+
+    // Mode aléatoire ou fallback
+    if (!background) {
+        if (fs.existsSync(`${basePath}/easterEgg`) && Math.random() < 0.005) {
+            const easterEggs = fs.readdirSync(`${basePath}/easterEgg`);
+            const file = easterEggs[Math.floor(Math.random() * easterEggs.length)];
+            background = `url(./assets/images/background/easterEgg/${file})`;
+        } else if (fs.existsSync(`${basePath}/${themeFolder}`)) {
+            const backgrounds = fs.readdirSync(`${basePath}/${themeFolder}`);
+            const file = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+            background = `linear-gradient(#00000080, #00000080), url(./assets/images/background/${themeFolder}/${file})`;
+        }
+    }
+
+    body.style.backgroundImage = background || 'none';
+    body.style.backgroundColor = background ? 'transparent' : (isDark ? '#000' : '#fff');
     body.style.backgroundSize = 'cover';
+}
+
+/**
+ * Retourne la liste fusionnée des instances (distantes + personnalisées)
+ */
+async function getMergedInstanceList(db) {
+    const remote = await config.getInstanceList().catch(() => []);
+    const configClient = await db.readData('configClient') || {};
+    const custom = configClient.custom_instances || [];
+    return [...remote, ...custom];
+}
+
+/**
+ * Structure minimale d'une instance personnalisée
+ */
+function createCustomInstance(data) {
+    return {
+        name: data.name,
+        isCustom: true,
+        url: data.url || null,
+        loadder: {
+            minecraft_version: data.minecraft_version || 'latest_release',
+            loadder_type: data.loader_type || 'none',
+            loadder_version: data.loader_version || 'latest'
+        },
+        verify: false,
+        ignored: ['config', 'logs', 'resourcepacks', 'options.txt', 'optionsof.txt'],
+        status: {
+            ip: data.server_ip || 'localhost',
+            port: data.server_port || 25565,
+            nameServer: data.server_name || data.name
+        },
+        whitelistActive: false,
+        whitelist: [],
+        jvm_args: data.jvm_args || [],
+        game_args: data.game_args || []
+    };
+}
+
+/**
+ * Retourne la liste des arrière-plans disponibles (dark ou light)
+ */
+function getAvailableBackgrounds(theme) {
+    const isDark = theme;
+    const themeFolder = isDark ? 'dark' : 'light';
+    const basePath = `${__dirname}/assets/images/background/${themeFolder}`;
+    if (!fs.existsSync(basePath)) return [];
+    return fs.readdirSync(basePath).filter(f => /\.(png|jpg|jpeg|webp)$/i.test(f));
 }
 
 async function changePanel(id) {
@@ -122,6 +206,9 @@ export {
     logger as logger,
     popup as popup,
     setBackground as setBackground,
+    getAvailableBackgrounds as getAvailableBackgrounds,
+    getMergedInstanceList as getMergedInstanceList,
+    createCustomInstance as createCustomInstance,
     skin2D as skin2D,
     addAccount as addAccount,
     accountSelect as accountSelect,

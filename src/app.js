@@ -49,6 +49,16 @@ ipcMain.on('update-window-progress-load', () => UpdateWindow.getWindow().setProg
 ipcMain.handle('path-user-data', () => app.getPath('userData'))
 ipcMain.handle('appData', e => app.getPath('appData'))
 
+ipcMain.handle('save-custom-background', async (_, sourcePath) => {
+    const userData = app.getPath('userData');
+    const bgDir = path.join(userData, 'backgrounds');
+    if (!fs.existsSync(bgDir)) fs.mkdirSync(bgDir, { recursive: true });
+    const ext = path.extname(sourcePath) || '.png';
+    const destPath = path.join(bgDir, `custom${ext}`);
+    fs.copyFileSync(sourcePath, destPath);
+    return destPath;
+})
+
 ipcMain.on('main-window-maximize', () => {
     if (MainWindow.getWindow().isMaximized()) {
         MainWindow.getWindow().unmaximize();
