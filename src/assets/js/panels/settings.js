@@ -19,7 +19,6 @@ class Settings {
         this.resolution()
         this.launcher()
         this.backgrounds()
-        this.instances()
     }
 
     navBTN() {
@@ -398,98 +397,6 @@ class Settings {
             }
             fileInput.value = '';
         });
-    }
-
-    async instances() {
-        const listEl = document.getElementById('custom-instances-list');
-        const addBtn = document.querySelector('.add-instance-btn');
-        const popup = document.getElementById('instance-form-popup');
-        const closeBtn = document.getElementById('close-instance-form');
-        const cancelBtn = document.querySelector('.instance-form-cancel');
-        const saveBtn = document.querySelector('.instance-form-save');
-        const loaderTypeSelect = document.querySelector('.instance-loader-type');
-
-        const renderInstances = async () => {
-            let configClient = await this.db.readData('configClient') || {};
-            const custom = configClient.custom_instances || [];
-            listEl.innerHTML = '';
-            custom.forEach(inst => {
-                const card = document.createElement('div');
-                card.className = 'instance-card custom-instance';
-                card.innerHTML = `
-                    <div class="instance-card-name">${inst.name}</div>
-                    <div class="instance-card-info">Minecraft ${inst.loadder?.minecraft_version || '?'} - ${inst.loadder?.loadder_type === 'none' ? 'Vanilla' : inst.loadder?.loadder_type}</div>
-                    <button class="instance-card-delete" data-name="${inst.name}">Supprimer</button>
-                `;
-                listEl.appendChild(card);
-            });
-        };
-
-        loaderTypeSelect.addEventListener('change', () => {
-            document.querySelector('.instance-loader-version').disabled = loaderTypeSelect.value === 'none';
-        });
-
-        addBtn.addEventListener('click', () => {
-            document.querySelector('.instance-name').value = '';
-            document.querySelector('.instance-version').value = '1.20.4';
-            document.querySelector('.instance-loader-type').value = 'none';
-            document.querySelector('.instance-loader-version').value = 'latest';
-            document.querySelector('.instance-loader-version').disabled = true;
-            document.querySelector('.instance-url').value = '';
-            document.querySelector('.instance-server-ip').value = '';
-            document.querySelector('.instance-server-port').value = '25565';
-            document.querySelector('.instance-server-name').value = '';
-            popup.classList.add('show');
-        });
-
-        const closeForm = () => popup.classList.remove('show');
-        closeBtn.addEventListener('click', closeForm);
-        cancelBtn.addEventListener('click', closeForm);
-
-        saveBtn.addEventListener('click', async () => {
-            const name = document.querySelector('.instance-name').value.trim();
-            if (!name) {
-                alert('Veuillez entrer un nom pour l\'instance.');
-                return;
-            }
-            let configClient = await this.db.readData('configClient') || {};
-            configClient.custom_instances = configClient.custom_instances || [];
-            if (configClient.custom_instances.some(i => i.name === name)) {
-                alert('Une instance avec ce nom existe déjà.');
-                return;
-            }
-            const newInstance = createCustomInstance({
-                name,
-                minecraft_version: document.querySelector('.instance-version').value || '1.20.4',
-                loader_type: document.querySelector('.instance-loader-type').value,
-                loader_version: document.querySelector('.instance-loader-version').value || 'latest',
-                url: document.querySelector('.instance-url').value || null,
-                server_ip: document.querySelector('.instance-server-ip').value || 'localhost',
-                server_port: parseInt(document.querySelector('.instance-server-port').value) || 25565,
-                server_name: document.querySelector('.instance-server-name').value || name
-            });
-            configClient.custom_instances.push(newInstance);
-            await this.db.updateData('configClient', configClient);
-            await renderInstances();
-            closeForm();
-        });
-
-        listEl.addEventListener('click', async e => {
-            if (e.target.classList.contains('instance-card-delete')) {
-                const name = e.target.dataset.name;
-                if (!confirm(`Supprimer l'instance "${name}" ?`)) return;
-                let configClient = await this.db.readData('configClient') || {};
-                configClient.custom_instances = (configClient.custom_instances || []).filter(i => i.name !== name);
-                if (configClient.instance_selct === name) {
-                    const all = await getMergedInstanceList(this.db);
-                    configClient.instance_selct = all.find(i => i.name !== name)?.name || null;
-                }
-                await this.db.updateData('configClient', configClient);
-                await renderInstances();
-            }
-        });
-
-        await renderInstances();
     }
 }
 export default Settings;

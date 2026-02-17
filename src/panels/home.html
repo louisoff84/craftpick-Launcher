@@ -1,13 +1,10 @@
 <div class="container">
     <header class="home-header">
-        <div class="status-server">
-            <img class="server-status-icon" src="assets/images/icon.png">
-            <div class="server-status-infos">
-                <div class="server-status-name">Minecraft</div>
+        <div class="header-left">
+            <img class="logo-header" src="assets/images/icon.png">
+            <div class="header-info">
+                <div class="server-status-name">Craftpick Launcher</div>
                 <div class="server-status-text">Actif - 0 ms</div>
-            </div>
-            <div class="status-player-count">
-                <div class="player-count">0</div>
             </div>
         </div>
         <button class="settings-btn icon-settings" title="Paramètres"></button>
@@ -17,47 +14,42 @@
         <aside class="home-sidebar">
             <div class="player-card">
                 <div class="player-head"></div>
-                <span class="player-label">Profil</span>
+                <span class="player-label">Profil en ligne</span>
             </div>
 
-            <div class="play-elements">
-                <div class="play-instance">
-                    <button class="play-btn">Jouer</button>
-                    <div class="instance-select icon-arrow"></div>
-                </div>
-                <div class="info-starting-game">
-                    <div class="info-starting-game-text">Connexion au serveur de jeu...</div>
-                    <progress value="0" max="0" class="progress-bar"></progress>
-                </div>
+            <button class="play-btn">Jouer</button>
+
+            <div class="info-starting-game">
+                <div class="info-starting-game-text">Connexion au serveur de jeu...</div>
+                <progress value="0" max="0" class="progress-bar"></progress>
             </div>
         </aside>
 
         <main class="home-main">
-            <div class="new-tab">
-                <div class="titre-tab-new">Actualités</div>
+            <div class="news-section">
+                <h2 class="section-title">Actualités</h2>
                 <div class="news-list content-scroll"></div>
             </div>
-            <div class="social-tab">
+        </main>
+
+        <aside class="home-right">
+            <div class="social-section">
+                <h2 class="section-title">Nous suivre</h2>
                 <div class="social-list content-scroll">
-                    <div data-url="https://craftpick.fr" class="social-block">
+                    <a href="https://craftpick.fr" class="social-block" title="Site Web">
                         <div class="icon-web icon-social"></div>
-                    </div>
-                    <div data-url="https://github.com/louisoff84" class="social-block">
+                        <span>Site Web</span>
+                    </a>
+                    <a href="https://github.com/louisoff84" class="social-block" title="GitHub">
                         <div class="icon-github icon-social"></div>
-                    </div>
-                    <div data-url="https://www.youtube.com/@ArthurleB998" class="social-block">
+                        <span>GitHub</span>
+                    </a>
+                    <a href="https://www.youtube.com/@ArthurleB998" class="social-block" title="YouTube">
                         <div class="icon-youtube icon-social"></div>
-                    </div>
+                        <span>YouTube</span>
+                    </a>
                 </div>
             </div>
-        </main>
-    </div>
-
-    <div class="instance-popup">
-        <div class="instances-tab">
-            <div class="close-popup icon-close"></div>
-            <p>Choisissez votre Instance...</p>
-            <div class="instances-List"></div>
-        </div>
+        </aside>
     </div>
 </div>
