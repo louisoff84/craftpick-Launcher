@@ -1,7 +1,7 @@
 {
     "name": "craftpick",
     "preductname": "craftpick Launcher",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "description": "Launcher Mincraft pour le serveur craftpick.fr",
     "main": "src/app.js",
     "author": {
@@ -32,7 +32,7 @@
         "cross-env": "^7.0.3",
         "electron": "^30.5.1",
         "electron-builder": "^26.0.12",
-        "javascript-obfuscator": "^4.1.0",
+        "javascript-obfuscator": "^5.3.0",
         "jimp": "^0.22.12",
         "nodemon": "^3.1.2",
         "png2icons": "^2.0.1"
