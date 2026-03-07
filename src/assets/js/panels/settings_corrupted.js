@@ -3,7 +3,7 @@
  * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
-import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground, getMergedInstanceList, createCustomInstance, getAvailableBackgrounds } from '../utils.js'
+import { changePanel, accountSelect, database, Slider, config, setStatus, popup, appdata, setBackground, getAvailableBackgrounds, getMergedInstanceList, createCustomInstance } from '../utils.js'
 const { ipcRenderer } = require('electron');
 const os = require('os');
 
@@ -148,35 +148,49 @@ class Settings {
 
         let slider = new Slider(".memory-slider", parseFloat(ram.ramMin), parseFloat(ram.ramMax));
 
-        sliderDiv.addEventListener("change", async () => {
-            let configClient = await this.db.readData('configClient')
-            let value = slider.getValue();
-            configClient.java_config.java_memory = { min: value[0], max: value[1] }
-            await this.db.updateData('configClient', configClient)
-        })
+        let minSpan = document.querySelector(".slider-touch-left span");
+        let maxSpan = document.querySelector(".slider-touch-right span");
+
+        minSpan.setAttribute("value", `${ram.ramMin} Go`);
+        maxSpan.setAttribute("value", `${ram.ramMax} Go`);
+
+        slider.on("change", async (min, max) => {
+            let config = await this.db.readData('configClient');
+            minSpan.setAttribute("value", `${min} Go`);
+            maxSpan.setAttribute("value", `${max} Go`);
+            config.java_config.java_memory = { min: min, max: max };
+            this.db.updateData('configClient', config);
+        });
     }
 
     async javaPath() {
-        let config = await this.db.readData('configClient');
+        let javaPathText = document.querySelector(".java-path-txt")
+        javaPathText.textContent = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}/runtime`;
+
+        let configClient = await this.db.readData('configClient')
+        let javaPath = configClient?.java_config?.java_path || 'Utiliser la version de java livre avec le launcher';
         let javaPathInputTxt = document.querySelector(".java-path-input-text");
         let javaPathInputFile = document.querySelector(".java-path-input-file");
+        javaPathInputTxt.value = javaPath;
 
-        if (config.java_config.java_path) {
-            javaPathInputTxt.value = config.java_config.java_path
-        } else {
-            javaPathInputTxt.value = 'Utiliser la version de java livre avec le launcher';
-        }
+        document.querySelector(".java-path-set").addEventListener("click", async () => {
+            javaPathInputFile.value = '';
+            javaPathInputFile.click();
+            await new Promise((resolve) => {
+                let interval;
+                interval = setInterval(() => {
+                    if (javaPathInputFile.value != '') resolve(clearInterval(interval));
+                }, 100);
+            });
 
-        javaPathInputFile.addEventListener("change", async () => {
-            let configClient = await this.db.readData('configClient')
-            configClient.java_config.java_path = javaPathInputFile.files[0].path
-            await this.db.updateData('configClient', configClient);
-            javaPathInputTxt.value = javaPathInputFile.files[0].path
-        })
-
-        document.querySelector(".java-path-set").addEventListener("click", () => {
-            javaPathInputFile.click()
-        })
+            if (javaPathInputFile.value.replace(".exe", '').endsWith("java") || javaPathInputFile.value.replace(".exe", '').endsWith("javaw")) {
+                let configClient = await this.db.readData('configClient')
+                let file = javaPathInputFile.files[0].path;
+                javaPathInputTxt.value = file;
+                configClient.java_config.java_path = file
+                await this.db.updateData('configClient', configClient);
+            } else alert("Le nom du fichier doit être java ou javaw");
+        });
 
         document.querySelector(".java-path-reset").addEventListener("click", async () => {
             let configClient = await this.db.readData('configClient')
@@ -414,7 +428,7 @@ class Settings {
             try {
                 namemcResults.innerHTML = '<div class="namemc-loading">Recherche en cours...</div>';
                 
-                // Utiliser l'API Mojang pour obtenir l'UUID
+                // Utiliser l'API de NameMC pour obtenir l'UUID
                 const uuidResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
                 if (!uuidResponse.ok) {
                     throw new Error('Joueur non trouvé');
@@ -423,9 +437,9 @@ class Settings {
                 const uuidData = await uuidResponse.json();
                 const uuid = uuidData.id;
                 
-                // Utiliser Minotar pour le skin et l'avatar (plus simple et fiable)
-                const skinUrl = `https://minotar.net/skin/${username}.png`;
-                const avatarUrl = `https://minotar.net/armor/body/${username}/100.png`;
+                // Récupérer le skin depuis les serveurs Minecraft
+                const skinUrl = `https://crafatar.com/skins/${uuid}`;
+                const avatarUrl = `https://crafatar.com/renders/body/${uuid}`;
                 
                 return {
                     username: username,
@@ -458,110 +472,6 @@ class Settings {
                 </div>
             `;
             namemcResults.appendChild(resultCard);
-        };
-
-        const renderSkins = async () => {
-            let configClient = await this.db.readData('configClient') || {};
-            const savedSkins = configClient.saved_skins || [];
-            const selectedSkin = configClient.selected_skin;
-            
-            // Vider la liste
-            listEl.innerHTML = '';
-            
-            // Ajouter le bouton d'upload
-            const uploadCard = document.createElement('div');
-            uploadCard.className = 'skin-card';
-            uploadCard.id = 'upload-skin';
-            uploadCard.innerHTML = `
-                <div class="skin-upload">
-                    <div class="icon-skin-upload"></div>
-                </div>
-                <div class="skin-text">Télécharger un skin</div>
-                <input type="file" class="skin-file-input" accept="image/png" hidden>
-            `;
-            listEl.appendChild(uploadCard);
-            
-            // Ajouter le bouton NameMC
-            const namemcCard = document.createElement('div');
-            namemcCard.className = 'skin-card';
-            namemcCard.id = 'namemc-skin';
-            namemcCard.innerHTML = `
-                <div class="skin-namemc">
-                    <div class="icon-namemc"></div>
-                </div>
-                <div class="skin-text">Chercher sur NameMC</div>
-            `;
-            listEl.appendChild(namemcCard);
-
-            // Afficher les skins sauvegardés
-            savedSkins.forEach((skin, index) => {
-                const card = document.createElement('div');
-                const isSelected = selectedSkin && selectedSkin.name === skin.name;
-                card.className = `skin-card saved-skin ${isSelected ? 'selected-skin' : ''}`;
-                card.innerHTML = `
-                    <div class="skin-preview">
-                        <canvas class="skin-canvas" width="64" height="64"></canvas>
-                        ${isSelected ? '<div class="selected-indicator">✓</div>' : ''}
-                    </div>
-                    <div class="skin-info-card">
-                        <div class="skin-name">${skin.name}</div>
-                        <div class="skin-date">${new Date(skin.date).toLocaleDateString()}</div>
-                    </div>
-                    <div class="skin-actions">
-                        <button class="skin-select-btn" data-index="${index}">${isSelected ? 'Sélectionné' : 'Sélectionner'}</button>
-                        <button class="skin-delete-btn" data-index="${index}">Supprimer</button>
-                    </div>
-                `;
-                listEl.appendChild(card);
-
-                // Dessiner l'aperçu du skin
-                const canvas = card.querySelector('.skin-canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.onload = () => {
-                    ctx.drawImage(img, 8, 8, 48, 48); // Afficher la tête du skin
-                };
-                img.src = skin.data;
-            });
-        };
-
-        const showPreview = (file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                currentSkinData = e.target.result;
-                currentSkinFile = file;
-                
-                skinName.textContent = file.name;
-                skinType.textContent = file.type;
-                skinSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-                
-                // Créer l'aperçu 3D du skin
-                preview3D.innerHTML = '';
-                const canvas = document.createElement('canvas');
-                canvas.width = 200;
-                canvas.height = 300;
-                canvas.className = 'skin-3d-canvas';
-                preview3D.appendChild(canvas);
-                
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.onload = () => {
-                    // Dessiner une version simple du skin (face et corps)
-                    ctx.drawImage(img, 8, 8, 16, 16, 50, 20, 100, 100); // Tête
-                    ctx.drawImage(img, 20, 20, 8, 12, 70, 120, 50, 75); // Corps
-                    ctx.drawImage(img, 44, 20, 8, 12, 130, 120, 50, 75); // Corps arrière
-                };
-                img.src = currentSkinData;
-                
-                previewContainer.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        };
-
-        const closePreview = () => {
-            previewContainer.style.display = 'none';
-            currentSkinFile = null;
-            currentSkinData = null;
         };
 
         // Gérer la popup NameMC
@@ -612,20 +522,47 @@ class Settings {
                     namemcPopup.classList.remove('show');
                     namemcInput.value = '';
                     namemcResults.innerHTML = '<div class="namemc-loading">Entrez un pseudo pour rechercher...</div>';
-                    
-                    // Afficher l'aperçu du skin
-                    showPreview(file);
-                } catch (error) {
-                    console.error('Erreur lors du téléchargement du skin:', error);
-                    new popup().openPopup({
-                        title: 'Erreur',
-                        content: 'Impossible de télécharger le skin.',
-                        color: 'red',
-                        options: true
-                    });
-                }
-            }
-        });
+            
+            const uuidData = await uuidResponse.json();
+            const uuid = uuidData.id;
+            
+            // Récupérer le skin depuis les serveurs Minecraft
+            const skinUrl = `https://crafatar.com/skins/${uuid}`;
+            const avatarUrl = `https://crafatar.com/renders/body/${uuid}`;
+            
+            return {
+                username: username,
+                uuid: uuid,
+                skinUrl: skinUrl,
+                avatarUrl: avatarUrl
+            };
+        } catch (error) {
+            console.error('Erreur NameMC:', error);
+            throw error;
+        }
+    };
+
+    // Afficher les résultats de la recherche
+    const displayNamemcResults = (results) => {
+        namemcResults.innerHTML = '';
+        
+        const resultCard = document.createElement('div');
+        resultCard.className = 'namemc-skin-result';
+        resultCard.innerHTML = `
+            <img src="${results.avatarUrl}" alt="${results.username}" class="namemc-skin-avatar">
+            <div class="namemc-skin-info">
+                <div class="namemc-skin-username">${results.username}</div>
+                <div class="namemc-skin-uuid">${results.uuid}</div>
+            </div>
+            <div class="namemc-skin-actions">
+                <button class="namemc-use-skin-btn" data-username="${results.username}" data-skin-url="${results.skinUrl}">
+                    Utiliser ce skin
+                </button>
+            </div>
+        `;
+        namemcResults.appendChild(resultCard);
+    };
+        };
 
         uploadBtn.addEventListener('click', () => {
             fileInput.click();

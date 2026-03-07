@@ -240,6 +240,8 @@ class Home {
             downloadFileMultiple: configClient?.launcher_config?.download_multi ?? 5,
             intelEnabledMac: configClient?.launcher_config?.intelEnabledMac ?? true,
 
+            skin: configClient?.selected_skin?.data || null,
+
             loader: {
                 type: options.loadder?.loadder_type === 'none' ? null : (options.loadder?.loadder_type || null),
                 build: options.loadder?.loadder_version || 'latest',
@@ -255,7 +257,7 @@ class Home {
                 type: 'jre',
             },
 
-            JVM_ARGS:  Array.isArray(options.jvm_args) ? options.jvm_args : [],
+            JVM_ARGS: Array.isArray(options.jvm_args) ? options.jvm_args : [],
             GAME_ARGS: Array.isArray(options.game_args) ? options.game_args : [],
 
             screen: {

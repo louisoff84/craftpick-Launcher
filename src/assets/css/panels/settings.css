@@ -436,9 +436,204 @@
     background: var(--background-transparent);
 }
 
-.background-option.active-background {
-    background: var(--element-color);
+.background-opti.close-all.active-close {
+    background: var(--color);
     color: var(--background);
+}
+
+/* Styles pour le système de skins */
+.skins-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+}
+
+.skin-card {
+    background: var(--background-element);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+.skin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.skin-card.saved-skin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.skin-upload {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 0.5rem;
+    background: var(--element-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.skin-preview {
+    margin-bottom: 0.5rem;
+}
+
+.skin-canvas {
+    border: 2px solid var(--element-color);
+    border-radius: 5px;
+    background: #fff;
+}
+
+.skin-info-card {
+    flex: 1;
+    margin-bottom: 0.5rem;
+}
+
+.skin-name {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.skin-date {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.skin-actions {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.skin-select-btn, .skin-delete-btn {
+    flex: 1;
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.skin-select-btn {
+    background: var(--element-color);
+    color: var(--color);
+}
+
+.skin-select-btn:hover {
+    background: var(--color);
+    color: var(--background);
+}
+
+.skin-delete-btn {
+    background: #e74c3c;
+    color: white;
+}
+
+.skin-delete-btn:hover {
+    background: #c0392b;
+}
+
+.skin-preview-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--background);
+    border: 2px solid var(--element-color);
+    border-radius: 15px;
+    padding: 2rem;
+    z-index: 1000;
+    min-width: 400px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.skin-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--element-color);
+}
+
+.skin-preview-header h3 {
+    margin: 0;
+    color: var(--color);
+}
+
+.skin-preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.skin-apply-btn, .skin-cancel-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.skin-apply-btn {
+    background: var(--element-color);
+    color: var(--color);
+}
+
+.skin-apply-btn:hover {
+    background: var(--color);
+    color: var(--background);
+}
+
+.skin-cancel-btn {
+    background: #95a5a6;
+    color: white;
+}
+
+.skin-cancel-btn:hover {
+    background: #7f8c8d;
+}
+
+.skin-preview-content {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.skin-preview-3d {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.skin-3d-canvas {
+    border: 2px solid var(--element-color);
+    border-radius: 10px;
+    background: #f0f0f0;
+}
+
+.skin-info {
+    flex: 1;
+}
+
+.skin-info p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.skin-info strong {
+    color: var(--element-color);
 }
 
 .background-previews {
@@ -646,4 +841,198 @@
     background: var(--element-color);
     border: none;
     color: var(--background);
+}
+
+/* Styles pour la popup NameMC */
+.namemc-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000000b3;
+    z-index: 1001;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.namemc-popup.show {
+    display: flex;
+}
+
+.namemc-popup-content {
+    position: relative;
+    background: var(--background);
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.namemc-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--element-color);
+}
+
+.namemc-popup-header h3 {
+    margin: 0;
+    color: var(--color);
+}
+
+.namemc-popup-header .close-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: var(--color);
+}
+
+.namemc-search {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.namemc-input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--element-color);
+    border-radius: 10px;
+    background: var(--shadow);
+    color: var(--color);
+    font-size: 0.9rem;
+}
+
+.namemc-search-btn {
+    padding: 0.5rem 1.5rem;
+    background: var(--element-color);
+    color: var(--background);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.namemc-search-btn:hover {
+    opacity: 0.9;
+}
+
+.namemc-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.namemc-loading {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color);
+    opacity: 0.7;
+}
+
+.namemc-skin-result {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--background-element);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.namemc-skin-result:hover {
+    background: var(--shadow);
+}
+
+.namemc-skin-avatar {
+    width: 64px;
+    height: 64px;
+    margin-right: 1rem;
+    border: 2px solid var(--element-color);
+    border-radius: 5px;
+}
+
+.namemc-skin-info {
+    flex: 1;
+}
+
+.namemc-skin-username {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.namemc-skin-uuid {
+    font-size: 0.8rem;
+    opacity: 0.7;
+    font-family: monospace;
+}
+
+.namemc-skin-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.namemc-use-skin-btn {
+    padding: 0.5rem 1rem;
+    background: var(--element-color);
+    color: var(--background);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.namemc-use-skin-btn:hover {
+    opacity: 0.9;
+}
+
+.namemc-error {
+    text-align: center;
+    padding: 2rem;
+    color: #e74c3c;
+}
+
+.skin-namemc {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 0.5rem;
+    background: var(--element-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.selected-skin {
+    border: 2px solid var(--color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.selected-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--color);
+    color: var(--background);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
 }
