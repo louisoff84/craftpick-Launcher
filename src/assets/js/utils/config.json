@@ -1,0 +1,8 @@
+{
+  "name": "craftpick",
+  "dataDirectory": ".minecraft",
+  "java": {
+    "version": "17",
+    "type": "jre"
+  }
+}

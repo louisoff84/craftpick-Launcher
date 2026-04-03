@@ -3,7 +3,6 @@
         <p>Paramètres</p>
         <div class="nav-box">
             <div id="account" class="nav-settings-btn active-settings-BTN">COMPTES</div>
-            <div id="skins" class="nav-settings-btn">SKINS</div>
             <div id="java" class="nav-settings-btn">JAVA</div>
             <div id="resolution" class="nav-settings-btn">RESOLUTION</div>
             <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
@@ -20,65 +19,6 @@
                     <div class="icon-account-add"></div>
                 </div>
                 <div class="add-text-profile">Ajouter un compte / add an account</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="skins-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Skins Minecraft</div>
-        <div class="setting-text" style="margin-bottom: 1rem;">
-            Choisissez et personnalisez vos skins Minecraft. Vous pouvez télécharger des skins depuis des fichiers ou utiliser des skins par défaut.
-        </div>
-        
-        <div class="skins-list content-scroll" id="skins-list">
-            <div class="skin-card" id="upload-skin">
-                <div class="skin-upload">
-                    <div class="icon-skin-upload"></div>
-                </div>
-                <div class="skin-text">Télécharger un skin</div>
-                <input type="file" class="skin-file-input" accept="image/png" hidden>
-            </div>
-            <div class="skin-card" id="namemc-skin">
-                <div class="skin-namemc">
-                    <div class="icon-namemc"></div>
-                </div>
-                <div class="skin-text">Chercher sur NameMC</div>
-            </div>
-        </div>
-
-        <div class="skin-preview-container" id="skin-preview-container" style="display: none;">
-            <div class="skin-preview-header">
-                <h3>Aperçu du skin</h3>
-                <div class="skin-preview-actions">
-                    <button class="skin-apply-btn">Appliquer</button>
-                    <button class="skin-cancel-btn">Annuler</button>
-                </div>
-            </div>
-            <div class="skin-preview-content">
-                <div class="skin-preview-3d" id="skin-preview-3d">
-                    <!-- Le skin 3D sera affiché ici -->
-                </div>
-                <div class="skin-info">
-                    <p><strong>Nom:</strong> <span id="skin-name">-</span></p>
-                    <p><strong>Type:</strong> <span id="skin-type">-</span></p>
-                    <p><strong>Taille:</strong> <span id="skin-size">-</span></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="namemc-popup" id="namemc-popup" style="display: none;">
-            <div class="namemc-popup-content">
-                <div class="namemc-popup-header">
-                    <h3>Chercher un skin sur NameMC</h3>
-                    <div class="close-popup icon-close" id="close-namemc-popup"></div>
-                </div>
-                <div class="namemc-search">
-                    <input type="text" class="namemc-input" placeholder="Entrez un pseudo Minecraft...">
-                    <button class="namemc-search-btn">Chercher</button>
-                </div>
-                <div class="namemc-results" id="namemc-results">
-                    <div class="namemc-loading">Recherche en cours...</div>
-                </div>
             </div>
         </div>
     </div>

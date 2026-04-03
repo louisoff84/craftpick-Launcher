@@ -3,17 +3,22 @@
  * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
 
-const { app, ipcMain, nativeTheme } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const { Microsoft } = require('minecraft-java-core');
 const { autoUpdater } = require('electron-updater')
 
 const path = require('path');
+const pkg = require('../package.json');
 const fs = require('fs');
+
+// Detection native du mode dev (sans electron-is-dev)
+const isDev = process.env.NODE_ENV === 'dev' || process.defaultApp || /[\\/]electron[\\/]/.test(process.execPath);
 
 const UpdateWindow = require("./assets/js/windows/updateWindow.js");
 const MainWindow = require("./assets/js/windows/mainWindow.js");
+const config = require('./assets/js/utils/config.json');
 
-let dev = process.env.NODE_ENV === 'dev';
+let dev = isDev;
 
 if (dev) {
     let appPath = path.resolve('./data/Launcher').replace(/\\/g, '/');
@@ -80,7 +85,9 @@ ipcMain.handle('is-dark-theme', (_, theme) => {
     return nativeTheme.shouldUseDarkColors;
 })
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => {
+    app.quit();
+});
 
 autoUpdater.autoDownload = false;
 
@@ -118,9 +125,11 @@ autoUpdater.on('update-downloaded', () => {
 autoUpdater.on('download-progress', (progress) => {
     const updateWindow = UpdateWindow.getWindow();
     if (updateWindow) updateWindow.webContents.send('download-progress', progress);
-})
+    console.log(`Downloaded ${progress.percent}%`);
+});
 
 autoUpdater.on('error', (err) => {
     const updateWindow = UpdateWindow.getWindow();
     if (updateWindow) updateWindow.webContents.send('error', err);
+    console.error(err);
 });

@@ -235,13 +235,12 @@ class Home {
             timeout: 10000,
             path: `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}`,
             instance: options.name,
-            version: options.loadder?.minecraft_version || 'latest_release',
+            version: options.loadder?.minecraft_version || 'latest',
             detached: configClient?.launcher_config?.closeLauncher == "close-all" ? false : true,
             downloadFileMultiple: configClient?.launcher_config?.download_multi ?? 5,
             intelEnabledMac: configClient?.launcher_config?.intelEnabledMac ?? true,
 
-            skin: configClient?.selected_skin?.data || null,
-
+            
             loader: {
                 type: options.loadder?.loadder_type === 'none' ? null : (options.loadder?.loadder_type || null),
                 build: options.loadder?.loadder_version || 'latest',
@@ -290,29 +289,9 @@ class Home {
             progressBar.max = size;
         });
 
-        launch.on('check', (progress, size) => {
-            infoStarting.innerHTML = `Vérification ${((progress / size) * 100).toFixed(0)}%`
-            ipcRenderer.send('main-window-progress', { progress, size })
-            progressBar.value = progress;
-            progressBar.max = size;
-        });
-
-        launch.on('estimated', (time) => {
-            let hours = Math.floor(time / 3600);
-            let minutes = Math.floor((time - hours * 3600) / 60);
-            let seconds = Math.floor(time - hours * 3600 - minutes * 60);
-            console.log(`${hours}h ${minutes}m ${seconds}s`);
-        })
-
         launch.on('speed', (speed) => {
             console.log(`${(speed / 1067008).toFixed(2)} Mb/s`)
         })
-
-        launch.on('patch', patch => {
-            console.log(patch);
-            ipcRenderer.send('main-window-progress-load')
-            infoStarting.innerHTML = `Patch en cours...`
-        });
 
         launch.on('data', (e) => {
             progressBar.style.display = "none"
@@ -325,16 +304,10 @@ class Home {
             console.log(e);
         })
 
-        launch.on('close', code => {
-            if (configClient.launcher_config.closeLauncher == 'close-launcher') {
-                ipcRenderer.send("main-window-show")
-            };
-            ipcRenderer.send('main-window-progress-reset')
-            infoStartingBOX.style.display = "none"
-            playInstanceBTN.style.display = "flex"
-            infoStarting.innerHTML = `Vérification`
-            new logger(pkg.name, '#7289da');
-            console.log('Close');
+        launch.on('patch', patch => {
+            console.log(patch);
+            ipcRenderer.send('main-window-progress-load')
+            infoStarting.innerHTML = `Patch en cours...`
         });
 
         launch.on('error', err => {
@@ -356,6 +329,18 @@ class Home {
             infoStarting.innerHTML = `Vérification`
             new logger(pkg.name, '#7289da');
             console.log(err);
+        });
+
+        launch.on('close', code => {
+            if (configClient.launcher_config.closeLauncher == 'close-launcher') {
+                ipcRenderer.send("main-window-show")
+            };
+            ipcRenderer.send('main-window-progress-reset')
+            infoStartingBOX.style.display = "none"
+            playInstanceBTN.style.display = "flex"
+            infoStarting.innerHTML = `Vérification`
+            new logger(pkg.name, '#7289da');
+            console.log('Close');
         });
     }
 
