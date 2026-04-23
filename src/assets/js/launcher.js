@@ -9,6 +9,7 @@ import Settings from './panels/settings.js';
 
 // import modules
 import { logger, config, changePanel, database, popup, setBackground, accountSelect, addAccount, pkg } from './utils.js';
+import AzuriomAuth from './utils/azuriomAuth.js';
 const { AZauth, Microsoft, Mojang } = require('minecraft-java-core');
 
 // libs
@@ -193,6 +194,47 @@ class Launcher {
                     this.db.updateData('accounts', refresh_accounts, account_ID)
                     await addAccount(refresh_accounts)
                     if (account_ID == account_selected) accountSelect(refresh_accounts)
+                } else if (account.meta.type == 'azuriom') {
+                    console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
+                    popupRefresh.openPopup({
+                        title: 'Connexion',
+                        content: `Refresh account Type: ${account.meta.type} | Username: ${account.name}`,
+                        color: 'var(--color)',
+                        background: false
+                    });
+                    
+                    let azuriomUrl = this.config.azuriom_url || 'https://craftpick.fr';
+                    let refresh_accounts = await new AzuriomAuth(azuriomUrl).verify(account.access_token);
+
+                    if (refresh_accounts.error) {
+                        this.db.deleteData('accounts', account_ID)
+                        if (account_ID == account_selected) {
+                            configClient.account_selected = null
+                            this.db.updateData('configClient', configClient)
+                        }
+                        console.error(`[Account] ${account.name}: ${refresh_accounts.message}`);
+                        continue;
+                    }
+
+                    // Reformater les données pour correspondre au format attendu
+                    let formattedAccount = {
+                        access_token: refresh_accounts.access_token,
+                        client_token: refresh_accounts.uuid,
+                        uuid: refresh_accounts.uuid,
+                        name: refresh_accounts.username,
+                        user_properties: {},
+                        meta: {
+                            type: 'azuriom',
+                            online: false,
+                            demo: false,
+                            uuid: refresh_accounts.uuid
+                        }
+                    };
+
+                    formattedAccount.ID = account_ID
+                    this.db.updateData('accounts', formattedAccount, account_ID)
+                    await addAccount(formattedAccount)
+                    if (account_ID == account_selected) accountSelect(formattedAccount)
                 } else if (account.meta.type == 'Mojang') {
                     console.log(`Account Type: ${account.meta.type} | Username: ${account.name}`);
                     popupRefresh.openPopup({
