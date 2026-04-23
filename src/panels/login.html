@@ -1,14 +1,71 @@
 <div class="container">
-    <div class="login-home login-tabs">
+    <!-- Login Options Panel (Microsoft / Azuriom) -->
+    <div class="login-options-panel login-tabs" style="display: none;">
+        <div class="login-text">Choisissez votre méthode de connexion</div>
+        <div class="login-description" style="margin-bottom: 1rem; font-size: 0.9rem; opacity: 0.8;">
+            Connectez-vous avec votre compte Microsoft ou votre compte Azuriom
+        </div>
+
+        <div class="login-options" style="display: flex; flex-direction: column; gap: 1rem;">
+            <button class="connect-microsoft" style="padding: 12px 24px; font-size: 1rem;">
+                <span style="margin-right: 8px;">🎮</span> Connexion Microsoft
+            </button>
+            <button class="connect-azuriom" style="padding: 12px 24px; font-size: 1rem;">
+                <span style="margin-right: 8px;">🔐</span> Connexion Azuriom
+            </button>
+        </div>
+    </div>
+
+    <!-- Legacy Microsoft Home Panel -->
+    <div class="login-home login-tabs" style="display: none;">
         <div class="login-text">Veuillez vous identifier afin de jouer.</div>
 
         <div class="login-options">
             <button class="connect connect-home">Connexion</button>
-            <button class="cancel cancel-home"  style="display: none;">annuler</button>
+            <button class="cancel cancel-home" style="display: none;">annuler</button>
         </div>
     </div>
 
-    <div class="login-offline login-tabs">
+    <!-- Azuriom Login Panel -->
+    <div class="login-azuriom login-tabs" style="display: none;">
+        <div class="login-text">Connexion Azuriom</div>
+        <div class="login-description" style="margin-bottom: 1rem; font-size: 0.85rem; opacity: 0.8;">
+            Connectez-vous avec votre compte du site web
+        </div>
+
+        <div class="input-login">
+            <input type="email" class="email-azuriom" placeholder="Adresse e-mail" />
+            <input type="password" class="password-azuriom" placeholder="Mot de passe" />
+        </div>
+
+        <div class="login-options" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="connect-azuriom-btn">Se connecter</button>
+            <button class="cancel-azuriom" style="background: transparent; border: 1px solid var(--color);">Retour</button>
+            <button class="back-to-options" style="background: transparent; border: 1px solid var(--color); margin-top: 0.5rem;">
+                ← Choisir une autre méthode
+            </button>
+        </div>
+    </div>
+
+    <!-- Azuriom 2FA Panel -->
+    <div class="login-azuriom-2fa login-tabs" style="display: none;">
+        <div class="login-text">Vérification 2FA</div>
+        <div class="login-description" style="margin-bottom: 1rem; font-size: 0.85rem; opacity: 0.8;">
+            Entrez le code de vérification de votre application d'authentification
+        </div>
+
+        <div class="input-login">
+            <input type="text" class="code-2fa-azuriom" placeholder="Code 2FA (6 chiffres)" maxlength="6" />
+        </div>
+
+        <div class="login-options" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="connect-2fa-azuriom-btn">Vérifier</button>
+            <button class="cancel-2fa-azuriom" style="background: transparent; border: 1px solid var(--color);">Retour</button>
+        </div>
+    </div>
+
+    <!-- Offline/Crack Login Panel -->
+    <div class="login-offline login-tabs" style="display: none;">
         <div class="login-text">Veuillez entrer votre pseudo</div>
 
         <div class="input-login">
@@ -21,7 +78,8 @@
         </div>
     </div>
 
-    <div class="login-AZauth login-tabs">
+    <!-- Legacy AZauth Panel (pixelbattles) -->
+    <div class="login-AZauth login-tabs" style="display: none;">
         <div class="login-text">Veuillez vous connecter afin de jouer.!!COMPTE REQUIS SUR https://pixelbattles.fr</div>
 
         <div class="input-login">
@@ -35,8 +93,9 @@
         </div>
     </div>
 
-    <div class="login-AZauth-A2F login-tabs">
-        <div class="login-text">Veuillez entrer le code de sécurité.</div>
+    <!-- Legacy AZauth 2FA Panel -->
+    <div class="login-AZauth-A2F login-tabs" style="display: none;">
+        <div class="login-text">Veuillez entrer le code de sécurité sur votre application d'authentifications (google auth ou authy).</div>
 
         <div class="input-login">
             <input type="text" class="A2F A2F-AZauth" placeholder="Code" />

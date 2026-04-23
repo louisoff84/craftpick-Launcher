@@ -2,9 +2,10 @@
  * @author Luuxis
  * Luuxis License v1.0 (voir fichier LICENSE pour les détails en FR/EN)
  */
-const { AZauth, Mojang } = require('minecraft-java-core');
+const { AZauth, Mojang, Microsoft } = require('minecraft-java-core');
 const { ipcRenderer } = require('electron');
 
+import AzuriomAuth from '../utils/azuriomAuth.js';
 import { popup, database, changePanel, accountSelect, addAccount, config, setStatus, getMergedInstanceList } from '../utils.js';
 
 class Login {
@@ -14,17 +15,212 @@ class Login {
         this.db = new database();
 
         if (typeof this.config.online == 'boolean') {
-            this.config.online ? this.getMicrosoft() : this.getCrack()
+            this.config.online ? this.getLoginOptions() : this.getCrack()
         } else if (typeof this.config.online == 'string') {
             if (this.config.online.match(/^(http|https):\/\/[^ "]+$/)) {
                 this.getAZauth();
             }
         }
         
-        document.querySelector('.cancel-home').addEventListener('click', () => {
+        document.querySelector('.cancel-home')?.addEventListener('click', () => {
             document.querySelector('.cancel-home').style.display = 'none'
             changePanel('settings')
         })
+    }
+
+    async getLoginOptions() {
+        console.log('Initializing login options...');
+        let loginOptions = document.querySelector('.login-options-panel');
+        if (loginOptions) loginOptions.style.display = 'block';
+        
+        // Microsoft login button
+        let microsoftBtn = document.querySelector('.connect-microsoft');
+        if (microsoftBtn) {
+            microsoftBtn.addEventListener('click', () => {
+                this.startMicrosoftLogin();
+            });
+        }
+        
+        // Azuriom login button
+        let azuriomBtn = document.querySelector('.connect-azuriom');
+        if (azuriomBtn) {
+            azuriomBtn.addEventListener('click', () => {
+                if (loginOptions) loginOptions.style.display = 'none';
+                this.getAzuriom();
+            });
+        }
+    }
+
+    async startMicrosoftLogin() {
+        console.log('Starting Microsoft login...');
+        let popupLogin = new popup();
+        
+        popupLogin.openPopup({
+            title: 'Connexion',
+            content: 'Veuillez patienter...',
+            color: 'var(--color)'
+        });
+
+        ipcRenderer.invoke('Microsoft-window', this.config.client_id).then(async account_connect => {
+            if (account_connect == 'cancel' || !account_connect) {
+                popupLogin.closePopup();
+                return;
+            } else {
+                await this.saveData(account_connect)
+                popupLogin.closePopup();
+            }
+        }).catch(err => {
+            popupLogin.openPopup({
+                title: 'Erreur',
+                content: err,
+                options: true
+            });
+        });
+    }
+
+    async getAzuriom() {
+        console.log('Initializing Azuriom login...');
+        let azuriomUrl = this.config.azuriom_url || 'https://craftpick.fr';
+        let azuriomClient = new AzuriomAuth(azuriomUrl);
+        let PopupLogin = new popup();
+        
+        let loginAzuriom = document.querySelector('.login-azuriom');
+        let loginAzuriom2FA = document.querySelector('.login-azuriom-2fa');
+
+        if (loginAzuriom) loginAzuriom.style.display = 'block';
+
+        let azuriomEmail = document.querySelector('.email-azuriom');
+        let azuriomPassword = document.querySelector('.password-azuriom');
+        let azuriom2FAInput = document.querySelector('.code-2fa-azuriom');
+        let connectAzuriomBtn = document.querySelector('.connect-azuriom-btn');
+        let connect2FABtn = document.querySelector('.connect-2fa-azuriom-btn');
+        let cancelAzuriomBtn = document.querySelector('.cancel-azuriom');
+        let cancel2FABtn = document.querySelector('.cancel-2fa-azuriom');
+        let backToOptionsBtn = document.querySelector('.back-to-options');
+
+        // Back button
+        if (backToOptionsBtn) {
+            backToOptionsBtn.addEventListener('click', () => {
+                if (loginAzuriom) loginAzuriom.style.display = 'none';
+                let loginOptions = document.querySelector('.login-options-panel');
+                if (loginOptions) loginOptions.style.display = 'block';
+            });
+        }
+
+        // Cancel buttons
+        if (cancelAzuriomBtn) {
+            cancelAzuriomBtn.addEventListener('click', () => {
+                if (loginAzuriom) loginAzuriom.style.display = 'none';
+                let loginOptions = document.querySelector('.login-options-panel');
+                if (loginOptions) loginOptions.style.display = 'block';
+            });
+        }
+
+        if (cancel2FABtn) {
+            cancel2FABtn.addEventListener('click', () => {
+                if (loginAzuriom2FA) loginAzuriom2FA.style.display = 'none';
+                if (loginAzuriom) loginAzuriom.style.display = 'block';
+            });
+        }
+
+        // Main login button
+        if (connectAzuriomBtn) {
+            connectAzuriomBtn.addEventListener('click', async () => {
+                PopupLogin.openPopup({
+                    title: 'Connexion en cours...',
+                    content: 'Veuillez patienter...',
+                    color: 'var(--color)'
+                });
+
+                if (!azuriomEmail?.value || !azuriomPassword?.value) {
+                    PopupLogin.openPopup({
+                        title: 'Erreur',
+                        content: 'Veuillez remplir tous les champs.',
+                        options: true
+                    });
+                    return;
+                }
+
+                let azuriomConnect = await azuriomClient.login(azuriomEmail.value, azuriomPassword.value);
+
+                if (azuriomConnect.error) {
+                    PopupLogin.openPopup({
+                        title: 'Erreur',
+                        content: azuriomConnect.message,
+                        options: true
+                    });
+                    return;
+                }
+
+                if (azuriomConnect.requires2fa) {
+                    if (loginAzuriom) loginAzuriom.style.display = 'none';
+                    if (loginAzuriom2FA) loginAzuriom2FA.style.display = 'block';
+                    PopupLogin.closePopup();
+                    return;
+                }
+
+                if (azuriomConnect.status === 'success') {
+                    await this.saveData(this.formatAzuriomData(azuriomConnect));
+                    PopupLogin.closePopup();
+                }
+            });
+        }
+
+        // 2FA validation button
+        if (connect2FABtn) {
+            connect2FABtn.addEventListener('click', async () => {
+                PopupLogin.openPopup({
+                    title: 'Connexion en cours...',
+                    content: 'Veuillez patienter...',
+                    color: 'var(--color)'
+                });
+
+                if (!azuriom2FAInput?.value) {
+                    PopupLogin.openPopup({
+                        title: 'Erreur',
+                        content: 'Veuillez entrer le code 2FA.',
+                        options: true
+                    });
+                    return;
+                }
+
+                let azuriomConnect = await azuriomClient.login(
+                    azuriomEmail.value, 
+                    azuriomPassword.value, 
+                    azuriom2FAInput.value
+                );
+
+                if (azuriomConnect.error) {
+                    PopupLogin.openPopup({
+                        title: 'Erreur',
+                        content: azuriomConnect.message,
+                        options: true
+                    });
+                    return;
+                }
+
+                if (azuriomConnect.status === 'success') {
+                    await this.saveData(this.formatAzuriomData(azuriomConnect));
+                    PopupLogin.closePopup();
+                }
+            });
+        }
+    }
+
+    formatAzuriomData(data) {
+        return {
+            access_token: data.access_token,
+            client_token: data.uuid, // Utiliser UUID comme client token
+            uuid: data.uuid,
+            name: data.username,
+            user_properties: {},
+            meta: {
+                type: 'azuriom',
+                online: false, // Azuriom n'est pas une auth Minecraft officielle
+                demo: false,
+                uuid: data.uuid
+            }
+        };
     }
 
     async getMicrosoft() {
@@ -32,32 +228,33 @@ class Login {
         let popupLogin = new popup();
         let loginHome = document.querySelector('.login-home');
         let microsoftBtn = document.querySelector('.connect-home');
-        loginHome.style.display = 'block';
+        if (loginHome) loginHome.style.display = 'block';
 
-        microsoftBtn.addEventListener("click", () => {
-            popupLogin.openPopup({
-                title: 'Connexion',
-                content: 'Veuillez patienter...',
-                color: 'var(--color)'
-            });
-
-            ipcRenderer.invoke('Microsoft-window', this.config.client_id).then(async account_connect => {
-                if (account_connect == 'cancel' || !account_connect) {
-                    popupLogin.closePopup();
-                    return;
-                } else {
-                    await this.saveData(account_connect)
-                    popupLogin.closePopup();
-                }
-
-            }).catch(err => {
+        if (microsoftBtn) {
+            microsoftBtn.addEventListener("click", () => {
                 popupLogin.openPopup({
-                    title: 'Erreur',
-                    content: err,
-                    options: true
+                    title: 'Connexion',
+                    content: 'Veuillez patienter...',
+                    color: 'var(--color)'
+                });
+
+                ipcRenderer.invoke('Microsoft-window', this.config.client_id).then(async account_connect => {
+                    if (account_connect == 'cancel' || !account_connect) {
+                        popupLogin.closePopup();
+                        return;
+                    } else {
+                        await this.saveData(account_connect)
+                        popupLogin.closePopup();
+                    }
+                }).catch(err => {
+                    popupLogin.openPopup({
+                        title: 'Erreur',
+                        content: err,
+                        options: true
+                    });
                 });
             });
-        })
+        }
     }
 
     async getCrack() {
