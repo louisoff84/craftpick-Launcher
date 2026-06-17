@@ -25,7 +25,7 @@ L’utilisation, la modification et la redistribution sont autorisées sous rés
 
 5. 🔐 Droit exclusif de revente par le créateur  
    - Seul le Titulaire (Luuxis) est autorisé à vendre ou concéder une licence commerciale du code source.
-
+ 
 6. 🚫 Interdiction de modifier cette licence  
    - Il est interdit de modifier, supprimer ou remplacer cette licence. Toute redistribution doit inclure cette licence sans altération.
 

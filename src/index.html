@@ -5,12 +5,30 @@
         <link rel="stylesheet" href="assets/css/index.css">
     </head>
     <body>
-        <div id="splash" style="display:none">
-            <img class="splash" src="assets/images/icon.png" />
-            <p class="splash-message"></p>
-            <p class="splash-author"><span class="author"></span></p>
-            <p class="message">Recherche de mise à jour...</p>
-            <progress value="0" max="0" class="progress"></progress>
+        <div class="index-page" data-view="loading">
+            <div id="get-started" style="display:none">
+                <div class="get-started-card">
+                    <span class="get-started-badge">BIENVENUE</span>
+                    <img class="get-started-logo" src="assets/images/icon.png" />
+                    <h1>Bienvenue sur Craftpick Launcher</h1>
+                    <p class="get-started-description">
+                        Configure ton launcher en quelques secondes et lance rapidement ton aventure.
+                    </p>
+                    <div class="get-started-features">
+                        <div class="get-started-feature">Connexion simplifiee</div>
+                        <div class="get-started-feature">Configuration automatique</div>
+                        <div class="get-started-feature">Mises a jour integrees</div>
+                    </div>
+                    <button class="get-started-button">Commencer</button>
+                </div>
+            </div>
+            <div id="splash" style="display:none">
+                <img class="splash" src="assets/images/icon.png" />
+                <p class="splash-message"></p>
+                <p class="splash-author"><span class="author"></span></p>
+                <p class="message">Recherche de mise a jour...</p>
+                <progress value="0" max="0" class="progress"></progress>
+            </div>
         </div>
         <script src="assets/js/index.js" type="module"></script>
     </body>

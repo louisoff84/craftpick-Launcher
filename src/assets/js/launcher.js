@@ -89,34 +89,71 @@ class Launcher {
     async initConfigClient() {
         console.log('Initializing Config Client...')
         let configClient = await this.db.readData('configClient')
+        const defaultConfigClient = {
+            account_selected: null,
+            instance_selct: null,
+            java_config: {
+                java_path: null,
+                java_memory: {
+                    min: 2,
+                    max: 4
+                }
+            },
+            game_config: {
+                screen_size: {
+                    width: 854,
+                    height: 480
+                }
+            },
+            launcher_config: {
+                download_multi: 5,
+                theme: 'auto',
+                closeLauncher: 'close-launcher',
+                intelEnabledMac: true,
+                background: 'random',
+                background_custom_path: null,
+                onboarding_completed: true
+            },
+            custom_instances: []
+        }
 
         if (!configClient) {
-            await this.db.createData('configClient', {
-                account_selected: null,
-                instance_selct: null,
-                java_config: {
-                    java_path: null,
-                    java_memory: {
-                        min: 2,
-                        max: 4
-                    }
-                },
-                game_config: {
-                    screen_size: {
-                        width: 854,
-                        height: 480
-                    }
-                },
-                launcher_config: {
-                    download_multi: 5,
-                    theme: 'auto',
-                    closeLauncher: 'close-launcher',
-                    intelEnabledMac: true,
-                    background: 'random',
-                    background_custom_path: null
-                },
-                custom_instances: []
-            })
+            await this.db.createData('configClient', defaultConfigClient)
+            return
+        }
+
+        const normalizedConfig = {
+            ...defaultConfigClient,
+            ...configClient,
+            java_config: {
+                ...defaultConfigClient.java_config,
+                ...(configClient.java_config || {}),
+                java_memory: {
+                    ...defaultConfigClient.java_config.java_memory,
+                    ...(configClient.java_config?.java_memory || {})
+                }
+            },
+            game_config: {
+                ...defaultConfigClient.game_config,
+                ...(configClient.game_config || {}),
+                screen_size: {
+                    ...defaultConfigClient.game_config.screen_size,
+                    ...(configClient.game_config?.screen_size || {})
+                }
+            },
+            launcher_config: {
+                ...defaultConfigClient.launcher_config,
+                ...(configClient.launcher_config || {})
+            },
+            custom_instances: configClient.custom_instances || []
+        }
+
+        if (typeof configClient.launcher_config?.onboarding_completed === 'undefined') {
+            normalizedConfig.launcher_config.onboarding_completed = true
+        }
+
+        if (JSON.stringify(configClient) !== JSON.stringify(normalizedConfig)) {
+            await this.db.updateData('configClient', normalizedConfig, configClient.ID)
         }
     }
 

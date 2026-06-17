@@ -1,17 +1,22 @@
-<div class="container">
+<div class="container settings-shell">
     <div class="nav-settings">
-        <p>Paramètres</p>
+        <div class="settings-brand">
+            <p>Parametres</p>
+            <span>Regle le launcher sans te perdre dans des menus compliques.</span>
+        </div>
         <div class="nav-box">
-            <div id="account" class="nav-settings-btn active-settings-BTN">COMPTES</div>
-            <div id="java" class="nav-settings-btn">JAVA</div>
-            <div id="resolution" class="nav-settings-btn">RESOLUTION</div>
-            <div id="launcher" class="nav-settings-btn">LAUNCHER</div>
-            <div id="save" class="nav-settings-btn">ACCUEIL</div>
+            <div id="account" class="nav-settings-btn active-settings-BTN">Comptes</div>
+            <div id="java" class="nav-settings-btn">Java</div>
+            <div id="resolution" class="nav-settings-btn">Resolution</div>
+            <div id="launcher" class="nav-settings-btn">Launcher</div>
+            <div id="save" class="nav-settings-btn nav-back-home">Retour a l'accueil</div>
         </div>
     </div>
 
+    <div class="settings-content">
     <div id="account-tab" class="container-settings active-container-settings">
         <div class="titre-tab">Comptes Minecraft</div>
+        <div class="settings-subtitle">Selectionne ton compte principal ou ajoute-en un nouveau.</div>
 
         <div class="accounts-list content-scroll">
             <div class="account" id="add">
@@ -24,7 +29,8 @@
     </div>
 
     <div id="java-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Paramètre de votre RAM / Your RAM settings</div>
+        <div class="titre-tab">Memoire et Java</div>
+        <div class="settings-subtitle">Ajuste la RAM et choisis un Java personnalise si besoin.</div>
         <div class="settings-elements-box">
             <div class="setting-text">
                 Définition de la RAM alloué à votre jeu, une quantité plus important augmenteras les performances de
@@ -78,6 +84,7 @@ It is recommended not to exceed 4GB for this value.
 
     <div id="resolution-tab" class="container-settings">
         <div class="titre-tab">Paramètres de resolution Minecraft</div>
+        <div class="settings-subtitle">Choisis une taille de fenetre adaptee a ton ecran.</div>
         <div class="settings-elements-box">
             <div class="setting-text">
                 Définissez une résolution personnalisée afin d'avoir un jeu adapté à votre écran.<br>
@@ -96,7 +103,8 @@ It is recommended not to exceed 4GB for this value.
     </div>
 
     <div id="launcher-tab" class="container-settings content-scroll">
-        <div class="titre-tab">Paramètre de téléchargement</div>
+        <div class="titre-tab">Options du launcher</div>
+        <div class="settings-subtitle">Theme, telechargement, fond d'ecran et comportement au lancement.</div>
         <div class="settings-elements-box">
             <div class="setting-text">
                 Ce paramètre détermine le nombre maximum de fichiers pouvant être téléchargés simultanément lors de la
@@ -169,5 +177,6 @@ It is recommended not to exceed 4GB for this value.
                 <div class="close-none close-btn">Environnement SILICON</div>
             </div>
         </div> -->
+    </div>
     </div>
 </div>

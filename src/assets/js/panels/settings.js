@@ -21,6 +21,12 @@ class Settings {
         this.backgrounds()
     }
 
+    clampNumber(value, min, max, fallback) {
+        const parsed = Number(value)
+        if (Number.isNaN(parsed)) return fallback
+        return Math.min(max, Math.max(min, parsed))
+    }
+
     navBTN() {
         document.querySelector('.nav-box').addEventListener('click', e => {
             if (e.target.classList.contains('nav-settings-btn')) {
@@ -159,6 +165,10 @@ class Settings {
         let config = await this.db.readData('configClient');
         let javaPathInputTxt = document.querySelector(".java-path-input-text");
         let javaPathInputFile = document.querySelector(".java-path-input-file");
+        let javaPathTxt = document.querySelector(".java-path-txt");
+        const bundledJavaPath = `${await appdata()}/${process.platform == 'darwin' ? this.config.dataDirectory : `.${this.config.dataDirectory}`}/runtime`
+
+        if (javaPathTxt) javaPathTxt.textContent = bundledJavaPath
 
         if (config.java_config.java_path) {
             javaPathInputTxt.value = config.java_config.java_path
@@ -198,21 +208,25 @@ class Settings {
 
         width.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
-            configClient.game_config.screen_size.width = width.value;
+            const safeWidth = this.clampNumber(width.value, 640, 7680, 854)
+            width.value = safeWidth;
+            configClient.game_config.screen_size.width = safeWidth;
             await this.db.updateData('configClient', configClient);
         })
 
         height.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
-            configClient.game_config.screen_size.height = height.value;
+            const safeHeight = this.clampNumber(height.value, 360, 4320, 480)
+            height.value = safeHeight;
+            configClient.game_config.screen_size.height = safeHeight;
             await this.db.updateData('configClient', configClient);
         })
 
         resolutionReset.addEventListener("click", async () => {
             let configClient = await this.db.readData('configClient')
-            configClient.game_config.screen_size = { width: '854', height: '480' };
-            width.value = '854';
-            height.value = '480';
+            configClient.game_config.screen_size = { width: 854, height: 480 };
+            width.value = 854;
+            height.value = 480;
             await this.db.updateData('configClient', configClient);
         })
     }
@@ -227,7 +241,9 @@ class Settings {
 
         maxDownloadFilesInput.addEventListener("change", async () => {
             let configClient = await this.db.readData('configClient')
-            configClient.launcher_config.download_multi = maxDownloadFilesInput.value;
+            const safeDownloadCount = this.clampNumber(maxDownloadFilesInput.value, 1, 20, 5)
+            maxDownloadFilesInput.value = safeDownloadCount;
+            configClient.launcher_config.download_multi = safeDownloadCount;
             await this.db.updateData('configClient', configClient);
         })
 

@@ -15,11 +15,12 @@ class Home {
         this.news()
         this.socialLick()
         this.instancesSelect()
-        document.querySelector('.settings-btn').addEventListener('click', e => changePanel('settings'))
+        document.querySelector('.settings-cta').addEventListener('click', e => changePanel('settings'))
     }
 
     async news() {
         let newsElement = document.querySelector('.news-list');
+        newsElement.innerHTML = ''
         let news = await config.getNews().then(res => res).catch(err => false);
         if (news) {
             if (!news.length) {
@@ -95,9 +96,22 @@ class Home {
 
         socials.forEach(social => {
             social.addEventListener('click', e => {
-                shell.openExternal(e.target.dataset.url)
+                shell.openExternal(e.currentTarget.dataset.url)
             })
         });
+    }
+
+    updateAccountDisplay(account) {
+        const accountLabels = document.querySelectorAll('.selected-account-name')
+        const name = account?.name || 'Aucun compte'
+        accountLabels.forEach(label => {
+            label.textContent = name
+        })
+    }
+
+    updateInstanceDisplay(instanceName) {
+        const instanceLabel = document.querySelector('.selected-instance-name')
+        if (instanceLabel) instanceLabel.textContent = instanceName || 'Aucune instance'
     }
 
     async instancesSelect() {
@@ -110,6 +124,8 @@ class Home {
         let instancePopup = document.querySelector('.instance-popup')
         let instancesListPopup = document.querySelector('.instances-List')
         let instanceCloseBTN = document.querySelector('.close-popup')
+
+        this.updateAccountDisplay(auth)
 
         if (instancesList.length === 1) {
             document.querySelector('.instance-select').style.display = 'none'
@@ -124,6 +140,8 @@ class Home {
             await this.db.updateData('configClient', configClient)
         }
 
+        this.updateInstanceDisplay(instanceSelect)
+
         for (let instance of instancesList) {
             if (instance.whitelistActive) {
                 let whitelist = instance.whitelist.find(whitelist => whitelist == auth?.name)
@@ -133,6 +151,7 @@ class Home {
                         let configClient = await this.db.readData('configClient')
                         configClient.instance_selct = newInstanceSelect.name
                         instanceSelect = newInstanceSelect.name
+                        this.updateInstanceDisplay(instanceSelect)
                         setStatus(newInstanceSelect.status)
                         await this.db.updateData('configClient', configClient)
                     }
@@ -155,6 +174,7 @@ class Home {
                 await this.db.updateData('configClient', configClient)
                 instanceSelect = instancesList.filter(i => i.name == newInstanceSelect)
                 instancePopup.style.display = 'none'
+                this.updateInstanceDisplay(newInstanceSelect)
                 let instance = await getMergedInstanceList(this.db)
                 let options = instance.find(i => i.name == configClient.instance_selct)
                 await setStatus(options.status)

@@ -9,23 +9,153 @@ const os = require('os');
 import { config, database } from './utils.js';
 const nodeFetch = require("node-fetch");
 
+const isDev = process.env.NODE_ENV === 'dev';
+
+function getDefaultConfigClient() {
+    return {
+        account_selected: null,
+        instance_selct: null,
+        java_config: {
+            java_path: null,
+            java_memory: {
+                min: 2,
+                max: 4
+            }
+        },
+        game_config: {
+            screen_size: {
+                width: 854,
+                height: 480
+            }
+        },
+        launcher_config: {
+            download_multi: 5,
+            theme: 'auto',
+            closeLauncher: 'close-launcher',
+            intelEnabledMac: true,
+            background: 'random',
+            background_custom_path: null,
+            onboarding_completed: false
+        },
+        custom_instances: []
+    };
+}
 
 class Splash {
     constructor() {
+        this.root = document.querySelector(".index-page");
+        this.splashView = document.querySelector("#splash");
         this.splash = document.querySelector(".splash");
         this.splashMessage = document.querySelector(".splash-message");
         this.splashAuthor = document.querySelector(".splash-author");
         this.message = document.querySelector(".message");
         this.progress = document.querySelector(".progress");
+        this.getStartedView = document.querySelector("#get-started");
+        this.continueButton = document.querySelector(".get-started-button");
+        this.databaseLauncher = new database();
+        this.configClient = null;
+        this.isFirstLaunch = false;
+
         document.addEventListener('DOMContentLoaded', async () => {
-            let databaseLauncher = new database();
-            let configClient = await databaseLauncher.readData('configClient');
-            let theme = configClient?.launcher_config?.theme || "auto"
-            let isDarkTheme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res)
-            document.body.className = isDarkTheme ? 'dark global' : 'light global';
-            if (process.platform == 'win32') ipcRenderer.send('update-window-progress-load')
-            this.startAnimation()
+            await this.bootstrap();
         });
+    }
+
+    async bootstrap() {
+        this.configClient = await this.ensureConfigClient();
+        await this.applyTheme(this.configClient);
+
+        if (process.platform === 'win32') {
+            ipcRenderer.send('update-window-progress-load');
+        }
+
+        if (this.isFirstLaunch) {
+            this.showGetStarted();
+            return;
+        }
+
+        this.startAnimation();
+    }
+
+    async ensureConfigClient() {
+        const existingConfig = await this.databaseLauncher.readData('configClient');
+
+        if (!existingConfig) {
+            this.isFirstLaunch = true;
+            return await this.databaseLauncher.createData('configClient', getDefaultConfigClient());
+        }
+
+        const defaultConfig = getDefaultConfigClient();
+        const launcherConfig = {
+            ...defaultConfig.launcher_config,
+            ...(existingConfig.launcher_config || {})
+        };
+
+        if (typeof existingConfig.launcher_config?.onboarding_completed === 'undefined') {
+            launcherConfig.onboarding_completed = true;
+        }
+
+        const normalizedConfig = {
+            ...defaultConfig,
+            ...existingConfig,
+            java_config: {
+                ...defaultConfig.java_config,
+                ...(existingConfig.java_config || {}),
+                java_memory: {
+                    ...defaultConfig.java_config.java_memory,
+                    ...(existingConfig.java_config?.java_memory || {})
+                }
+            },
+            game_config: {
+                ...defaultConfig.game_config,
+                ...(existingConfig.game_config || {}),
+                screen_size: {
+                    ...defaultConfig.game_config.screen_size,
+                    ...(existingConfig.game_config?.screen_size || {})
+                }
+            },
+            launcher_config: launcherConfig,
+            custom_instances: existingConfig.custom_instances || []
+        };
+
+        const shouldUpdateConfig = JSON.stringify(existingConfig) !== JSON.stringify(normalizedConfig);
+        if (shouldUpdateConfig) {
+            await this.databaseLauncher.updateData('configClient', normalizedConfig, existingConfig.ID);
+        }
+
+        this.isFirstLaunch = launcherConfig.onboarding_completed === false;
+        normalizedConfig.ID = existingConfig.ID;
+        return normalizedConfig;
+    }
+
+    async applyTheme(configClient) {
+        const theme = configClient?.launcher_config?.theme || "auto";
+        const isDarkTheme = await ipcRenderer.invoke('is-dark-theme', theme).then(res => res);
+        document.body.className = isDarkTheme ? 'dark global' : 'light global';
+    }
+
+    showGetStarted() {
+        this.root.dataset.view = 'get-started';
+        this.getStartedView.style.display = 'flex';
+        this.splashView.style.display = 'none';
+
+        this.continueButton.addEventListener('click', async () => {
+            this.continueButton.disabled = true;
+            await this.completeOnboarding();
+        }, { once: true });
+    }
+
+    async completeOnboarding() {
+        if (!this.configClient?.ID) {
+            this.configClient = await this.ensureConfigClient();
+        }
+
+        this.configClient.launcher_config.onboarding_completed = true;
+        await this.databaseLauncher.updateData('configClient', this.configClient, this.configClient.ID);
+
+        this.root.dataset.view = 'loading';
+        this.getStartedView.style.display = 'none';
+        this.startAnimation();
     }
 
     async startAnimation() {
@@ -38,20 +168,25 @@ class Splash {
         this.splashMessage.textContent = splash.message;
         this.splashAuthor.children[0].textContent = "@" + splash.author;
         await sleep(100);
-        document.querySelector("#splash").style.display = "block";
-        await sleep(500);
+        this.splashView.style.display = "block";
+        await sleep(300);
         this.splash.classList.add("opacity");
-        await sleep(500);
+        await sleep(350);
         this.splash.classList.add("translate");
         this.splashMessage.classList.add("opacity");
         this.splashAuthor.classList.add("opacity");
         this.message.classList.add("opacity");
-        await sleep(1000);
+        await sleep(700);
         this.checkUpdate();
     }
 
     async checkUpdate() {
         this.setStatus(`Recherche de mise à jour...`);
+
+        if (isDev) {
+            await sleep(400);
+            return this.maintenanceCheck();
+        }
 
         ipcRenderer.invoke('update-app').then().catch(err => {
             return this.shutdown(`erreur lors de la recherche de mise à jour :<br>${err.message}`);
